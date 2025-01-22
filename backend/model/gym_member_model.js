@@ -1,57 +1,34 @@
 const mongoose = require("mongoose");
+const AutoIncrement = require("mongoose-sequence")(mongoose);
 
 
 // schema for Gym Member 
-const gym_member_Schema = mongoose.Schema({
+const gym_member_Schema = new mongoose.Schema({
     gym_member_id:{
-        type:Number,
-        validate:{
-            validator: function(value){
-                return value >=1000 && value <= 9999;   // checking if it is 4 digit 
-            },
-            message:" Field must be 4 digit",
-        },
-        required: true,
+        type: Number,  
+        default:1000,
+    },
+    username: {
+        type: String, 
+        required: true, 
+        unique: true ,
+    },
+    password: { 
+        type: String, 
+        required: true ,
+    },
+    first_name: { 
+        type: String, 
+        //required: true ,
+    },
+    last_name: { 
+        type: String, 
+        //required: true ,
+    },
+    email: { 
+        type: String, 
+        required: true, 
         unique: true,
-    },
-    username:{
-        type:String,
-        unique:true,
-    },
-    password:{
-        type:String,
-        required:true,
-    },
-    first_name:{
-        type:String,
-        required: true,
-    },
-    last_name:{
-        type:String,
-        required:true,
-    },
-    gender:{
-        type: String,
-        required:true,
-    },
-    Date_of_birth:{
-        type:Date,
-        required:true,
-    },
-    contact_number:{
-        type:Number,
-        required:true,
-        validate:{
-            validator: function(v){
-                return v.toString().length()===10;
-            },
-            message: (props) => `{props.value} is not a valid phone number!`,
-        },
-    },
-    email: {
-        type: String,
-        unique: true,
-        required: true,
         match: [/\S+@\S+\.\S+/, "Please enter a valid email address."],
         validate: {
           validator: async function (v) {
@@ -67,36 +44,42 @@ const gym_member_Schema = mongoose.Schema({
             return true;
           },
           message: "Email already exists!",
-        },
+        }, 
     },
-    address:{
-        type:String,
-        required:true,
+    phone_number: { 
+        type: String, 
+        required: true ,
     },
-    city_id:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'CityModel',
-        required:true,
+    dob: { 
+        type: Date,
     },
-    state_id:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'StateModel',
-        required:true,
+    gender: { 
+        type: String, 
+        enum: ["Male", "Female", "Other"], 
+   //     required: true ,
     },
-    height:{
-        type:Number,
-        required:true,
+    address: { 
+        type: String, 
     },
-    weight:{
-        type:Number,
-        required:true,
+    state: { 
+        type: String,
     },
-    membership_status:{
-        type:String,
-        required:true,
-        default:"Active",
+    city: { 
+        type: String,
     },
-});
+    height: { 
+        type: Number ,
+    },
+    weight: { 
+        type: Number, 
+    },
+    membership_status: { 
+        type: String, 
+        default: "ACTIVE" ,
+    },
+  });
 
-const UserModel = mongoose.model("gym_member_model",gym_member_Schema);
-module.exports = UserModel;
+  gym_member_Schema.plugin(AutoIncrement, { inc_field: "gym_member_id" });
+
+const GymMember = mongoose.model("GymMember",gym_member_Schema);
+module.exports = GymMember;

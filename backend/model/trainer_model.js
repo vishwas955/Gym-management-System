@@ -1,44 +1,30 @@
 const mongoose = require("mongoose");
+const AutoIncrement = require("mongoose-sequence")(mongoose);
 
 
 // schema for Gym trainer
-const employee_schema = mongoose.Schema({
-   Emp_id:{
-    type:Number,
-    required:true,
-    unique:true,
-   },
-   Username:{
-    type:String,
-    required:true,
-    unique:true,
-   },
-   Password:{
-    type:String,
-    required:true,
-   },
-   First_Name:{
-    type:String,
-    required:true,
-   },
-   Last_Name:{
-    type:String,
-    required:true,
-   },
-  contact_number:{
-        type:Number,
-        required:true,
-        validate:{
-            validator: function(v){
-                return v.toString().length()===10;
-            },
-            message: (props) => `{props.value} is not a valid phone number!`,
-        },
+const trainer_Schema = new mongoose.Schema({
+    username: { 
+        type: String, 
+        required: true, 
+        unique: true 
     },
-    email: {
-        type: String,
+    password: { 
+        type: String, 
+        required: true 
+    },
+    first_name: { 
+        type: String, 
+        //required: true 
+    },
+    last_name: { 
+        type: String, 
+        //required: true 
+    },
+    email: { 
+        type: String, 
+        required: true, 
         unique: true,
-        required: true,
         match: [/\S+@\S+\.\S+/, "Please enter a valid email address."],
         validate: {
           validator: async function (v) {
@@ -55,53 +41,49 @@ const employee_schema = mongoose.Schema({
           },
           message: "Email already exists!",
         },
-      },
-    address:{
-        type:String,
-        required:true,
     },
-    city_id:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'CityModel',
-        required:true,
+    phone_number: { 
+        type: String, 
+        required: true 
     },
-    state_id:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'StateModel',
-        required:true,
+    dob: { 
+        type: Date,
     },
-    dob:{
-        type:Date,
-        required:true,
+    gender: { 
+        type: String, 
+        enum: ["Male", "Female", "Other"], 
+        //required: true 
     },
-    gender:{
-        type:String,
-        required:true,
+    address: { 
+        type: String, 
     },
-    joining_date:{
-        type:Date,
-        required:true,
-        default:Date.now,
+    state: { 
+        type: String,
     },
-    expertise_id:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'ExpertiseModel',
-        required:true,
+    city: { 
+        type: String, 
     },
-    certification:{
-        type:String,
-        required:false,
+    joining_date: { 
+        type: Date, 
+        default:Date.now 
     },
-    experience:{
-        type:Number,
-        required:true,
+    expertise: { 
+        type: String,
     },
-    is_admin:{
-        type:Boolean,
-        required:true,
+    certifications: { 
+        type: String 
     },
-});
+    experience: { 
+        type: Number, 
+    },
+    is_admin: { 
+        type: Boolean, 
+        default:false 
+    },
+    assigned_members: [{ type: mongoose.Schema.Types.ObjectId, ref: "GymMember" }],
+  });
+
 
 //export the employee schema
-const EmployeeModel = mongoose.model("employee_model",employee_schema);
-module.exports = EmployeeModel;
+const Trainer = mongoose.model("Trainer",trainer_Schema);
+module.exports = Trainer;

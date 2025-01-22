@@ -1,40 +1,38 @@
+const { Transaction } = require("mongodb");
 const mongoose = require("mongoose");
 
 // schema for payment details of the gym member that contains payment details of every member 
 
-const payment_schema = mongoose.Schema({
-    payment_id:{
+const paymentSchema = new mongoose.Schema({
+    transaction_id:{
         type:Number,
         required:true,
-        unique:true,
+        unique:true
     },
-    gym_member_id:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'UserModel',
-        required:true,
+    gym_member_id: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: "GymMember", 
+        required: true 
     },
-    payment_date:{
-        type:Date,
-        required:true,
-        default:Date.now,
+    payment_date: { 
+        type: Date, 
+        required: true 
     },
-    payment_amt:{
-        type:Number,
-        required:true,
+    amount: { 
+        type: Number, 
+        required: true 
     },
-    payment_method:{
-        type:String,
-        required:true,
-        enum:["Online/UPI","UPI","Cash"],
-        default:"Cash",
+    method: { 
+        type: String, 
+        required: true 
     },
-    payment_status:{
-        type:String,
-        required:true,
-        default:"Failed",
+    status: { 
+        type: String, 
+        enum: ["Pending", "Completed","Failed"], 
+        required: true 
     },
-});
+  });
 
 //Exporting the payment table
-const PaymentModel = mongoose.model("payment_model",payment_schema);
-module.exports = PaymentModel;
+const Payment = mongoose.model("Payment",payment_schema);
+module.exports = Payment;
