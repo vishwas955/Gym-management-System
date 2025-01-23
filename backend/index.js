@@ -13,11 +13,8 @@ app.use(cookieParser());
 app.use(express.json());
 require("./DBconn/conn");
 
-const GymMemberroutes = require('./route/GymMember');
-app.use('/auth/GymMember',GymMemberroutes);
-
-const Trainerroutes = require('./route/Trainer');
-app.use('/auth/Trainer',Trainerroutes);
+const Userroutes = require('./route/User');
+app.use('/auth/User',Userroutes);
 
 
 app.listen(Port,() => {

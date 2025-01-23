@@ -1,33 +1,30 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
-// schema for the membership of the gym member that contains subscription info of the gym member  
 const membershipSchema = new mongoose.Schema({
-    membership_id:{
-        type:Number,
-        required:true,
-        unique:true
-    },
-    gym_member_id_id: { 
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: "GymMember", 
-        required: true 
-    },
-    subscription_id: { 
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: "Subscription", 
-        required: true 
-    },
-    start_date: { 
-        type: Date, 
+    id: {
+        type: Number,
         required: true,
-        default:Date.now
+        unique: true
     },
-    end_date: { 
-        type: Date, 
-        required: true 
+    gymMemberId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
     },
-  });
+    subscriptionId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Subscription',
+        required: true
+    },
+    startDate: {
+        type: Date,
+        required: true
+    },
+    endDate: {
+        type: Date,
+        required: true
+    }
+});
 
-//Exporting the schema of the membership table
-const Membership = mongoose.model('Membership',membership_schema);
+const Membership = mongoose.model('Membership', membershipSchema);
 module.exports = Membership;
