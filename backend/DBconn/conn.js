@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
+require('dotenv').config()
 
-mongoose.connect("mongodb://localhost:27017/Caliber_fitness_gms")
+
+mongoose.connect(process.env.MONGO_URI)
 .then(() => console.log("The Data base is successfully connected!"))
 .catch(err => {
     console.log(err);

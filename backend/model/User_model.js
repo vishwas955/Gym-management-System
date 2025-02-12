@@ -1,12 +1,10 @@
 const mongoose = require('mongoose');
-//const AutoIncrement = require("mongoose-sequence")(mongoose);
+const AutoIncrement = require("mongoose-sequence")(mongoose);
 
 const userSchema = new mongoose.Schema({
-    id: {
-        type: Number,
-        required: true,
-        unique: true,
-        default:1
+    id:{
+        type:Number,
+        default:1000,
     },
     password: {
         type: String,
@@ -41,7 +39,7 @@ const userSchema = new mongoose.Schema({
           message: "Email already exists!",
         },
     },
-    phone_no: {
+    phone_number: {
         type: String,
         required: true
     },
@@ -81,9 +79,16 @@ const userSchema = new mongoose.Schema({
     },
     certifications: {
         type: [String]
-    }
-});
-//userSchema.plugin(AutoIncrement, { inc_field: "id" });
+    },
+    passwordResetToken: { 
+        type: String 
+    },
+    passwordResetExpires: { 
+        type: Date 
+    },
+},{timestamps:true});
+
+userSchema.plugin(AutoIncrement, { inc_field: "id" });
 
 const User = mongoose.model('User', userSchema);
 module.exports = User;

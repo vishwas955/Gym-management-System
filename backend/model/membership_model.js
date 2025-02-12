@@ -1,11 +1,6 @@
 const mongoose = require('mongoose');
 
 const membershipSchema = new mongoose.Schema({
-    id: {
-        type: Number,
-        required: true,
-        unique: true
-    },
     gymMemberId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
