@@ -5,6 +5,10 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const SendEmail = require('../utils/SendEmail');
 
+
+
+
+//Logout function 
 exports.register = async (req,res) => {
     try{
         const {first_name,last_name,gender,role,email,password,phone_number,dob} = req.body;
@@ -35,12 +39,18 @@ exports.register = async (req,res) => {
     }
 }
 
+
+
+
 //cookie options 
 const cookieOptions = {
     httpOnly:true,
     secure:false,//true for production 
     sameSite: 'Lax',
 };
+
+
+
 
 //login function 
 exports.login = async (req,res) => {
@@ -84,10 +94,16 @@ exports.login = async (req,res) => {
     }
 }
 
+
+
+//Logout function 
 exports.logout = async (req,res) => {
     res.clearCookie('cookie_token', cookieOptions).json({message:'Logged out Successfully!'});
 }
 
+
+
+//Forgot password function 
 exports.forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
@@ -159,8 +175,10 @@ exports.forgotPassword = async (req, res) => {
     }
 };
 
- 
-// Reset Password 
+
+
+
+// Reset Password function
 exports.resetPassword = async (req, res) => {
     try {
         const { token, password } = req.body;
@@ -193,4 +211,89 @@ exports.resetPassword = async (req, res) => {
         console.error("Error during resetPassword:", error);
         res.status(500).json({ message: "Server error", success: false });
     }
+};
+
+
+
+//Get All User that are registered
+exports.GetAllUser = async (req,res) => {
+    try { 
+        //Fetch Users whose role is User 
+        const users = await User.find({role : 'Member'}, "first_name last_name email _id"); // Fetch only necessary fields
+        res.json(users);
+    } catch (error) {
+        console.error("Error during resetPassword:", error);
+        res.status(500).json({ message: "Server error", success: false });
+    }
+}
+
+
+
+//Get All the Trainer that are registered
+exports.GetAllTrainer = async (req,res) => {
+    try { 
+        //Fetch Users whose role is Trainer 
+        const users = await User.find({role : 'Trainer'}, "first_name last_name email _id"); // Fetch only necessary fields
+        res.json(users);
+    } catch (error) {
+        console.error("Error during resetPassword:", error);
+        res.status(500).json({ message: "Server error", success: false });
+    }
+}
+
+
+
+//Assign Trainer to the Particular Gym-Member 
+exports.assignTrainer = async (req,res) => {
+    try {
+        const memberId = req.params.memberId; // Get member ID from URL params
+        const { trainerId } = req.body; // Trainer ID from request body
+
+        console.log("Assigning trainer:", trainerId, "to member:", memberId);
+
+        // Check if the member exists and is a "Member"
+        const member = await User.findOne({ _id: memberId, role: "Member" });
+        if (!member) {
+            return res.status(404).json({ error: "Member not found or not a valid member" });
+        }
+
+        // Check if the trainer exists and is actually a trainer
+        const trainer = await User.findOne({ _id: trainerId, role: "Trainer" });
+        if (!trainer) {
+            return res.status(404).json({ error: "Trainer not found or not a valid trainer" });
+        }
+
+        // Assign the trainer to the member
+        member.trainer_id = trainerId;
+        await member.save();
+
+        res.status(200).json({ message: "Trainer assigned successfully!", member });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            error: 'Internal Server Error!', success : false
+        });
+    }
+}
+
+
+
+//View Assigned Trainer to all Members
+exports.getAssignedTrainers = async (req, res) => {
+    try {
+        const membersWithTrainers = await User.find({ role: "Member", trainer_id: { $ne: null } }) 
+            .populate("trainer_id", "first_name last_name email") // Fetch trainer details (name, email)
+            .select("first_name last_name email trainer_id"); // Select relevant fields
+
+        if (membersWithTrainers.length === 0) {
+            return res.status(404).json({ error: "No members with assigned trainers found" });
+        }
+
+        res.status(200).json(membersWithTrainers);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            error: 'Internal Server Error!', success : false
+        });
+    }
 };
