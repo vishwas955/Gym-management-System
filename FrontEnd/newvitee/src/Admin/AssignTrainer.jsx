@@ -1,36 +1,52 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import axios from "axios";
 
 const AssignTrainer = () => {
-  // Dummy data for members and trainers
-  const [members, setMembers] = useState([
-    { id: 1, name: "John Doe", assignedTrainer: "" },
-    { id: 2, name: "Jane Smith", assignedTrainer: "" },
-    { id: 3, name: "Michael Lee", assignedTrainer: "" },
-    { id: 4, name: "Sara Green", assignedTrainer: "" },
-  ]);
-  
-  const [trainers] = useState([
-    { id: 1, name: "Trainer A" },
-    { id: 2, name: "Trainer B" },
-    { id: 3, name: "Trainer C" },
-  ]);
-
+  const [members, setMembers] = useState([]);
+  const [trainers, setTrainers] = useState([]);
   const [selectedTrainer, setSelectedTrainer] = useState(null);
   const [selectedMember, setSelectedMember] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
-  // Handle assigning trainer to member
+  // Fetch Members
+  useEffect(() => {
+    axios
+      .get("http://localhost:4000/auth/User/get-users", { withCredentials: true })
+      .then((response) => setMembers(response.data))
+      .catch((error) => console.error("Error fetching members:", error));
+  }, []);
+
+  // Fetch Trainers
+  useEffect(() => {
+    axios
+      .get("http://localhost:4000/trainer/get-trainers", { withCredentials: true })
+      .then((response) => setTrainers(response.data))
+      .catch((error) => console.error("Error fetching trainers:", error));
+  }, []);
+
+  // Assign Trainer
   const handleAssignTrainer = () => {
-    const updatedMembers = members.map((member) =>
-      member.id === selectedMember.id
-        ? { ...member, assignedTrainer: selectedTrainer.name }
-        : member
-    );
-    setMembers(updatedMembers);
-    setShowModal(false);
-    setSelectedTrainer(null);
-    setSelectedMember(null);
+    if (!selectedMember || !selectedTrainer) return;
+    axios
+      .put(
+        `http://localhost:4000/trainer/assign-trainer/${selectedMember._id}`,
+        { trainerId: selectedTrainer._id },
+        { withCredentials: true }
+      )
+      .then(() => {
+        setMembers((prevMembers) =>
+          prevMembers.map((member) =>
+            member._id === selectedMember._id
+              ? { ...member, trainer_id: selectedTrainer }
+              : member
+          )
+        );
+        setShowModal(false);
+        setSelectedTrainer(null);
+        setSelectedMember(null);
+      })
+      .catch((error) => console.error("Error assigning trainer:", error));
   };
 
   return (
@@ -42,16 +58,14 @@ const AssignTrainer = () => {
         <label className="block mb-2 text-lg font-medium">Select Member</label>
         <select
           onChange={(e) =>
-            setSelectedMember(
-              members.find((member) => member.id === parseInt(e.target.value))
-            )
+            setSelectedMember(members.find((member) => member._id === e.target.value))
           }
           className="p-2 border border-gray-300 rounded w-full"
         >
           <option value="">-- Select Member --</option>
           {members.map((member) => (
-            <option key={member.id} value={member.id}>
-              {member.name}
+            <option key={member._id} value={member._id}>
+              {member.first_name} {member.last_name} ({member.email})
             </option>
           ))}
         </select>
@@ -62,13 +76,13 @@ const AssignTrainer = () => {
         <div className="mb-4">
           <label className="block mb-2 text-lg font-medium">Select Trainer</label>
           <select
-            onChange={(e) => setSelectedTrainer(trainers.find((trainer) => trainer.id === parseInt(e.target.value)))}
+            onChange={(e) => setSelectedTrainer(trainers.find((trainer) => trainer._id === e.target.value))}
             className="p-2 border border-gray-300 rounded w-full"
           >
             <option value="">-- Select Trainer --</option>
             {trainers.map((trainer) => (
-              <option key={trainer.id} value={trainer.id}>
-                {trainer.name}
+              <option key={trainer._id} value={trainer._id}>
+                {trainer.first_name} {trainer.last_name}
               </option>
             ))}
           </select>
@@ -102,8 +116,7 @@ const AssignTrainer = () => {
             transition={{ duration: 0.3 }}
           >
             <h2 className="text-xl font-bold mb-4">
-              Are you sure you want to assign {selectedTrainer?.name} to{" "}
-              {selectedMember?.name}?
+              Are you sure you want to assign {selectedTrainer?.first_name} {selectedTrainer?.last_name} to {selectedMember?.first_name} {selectedMember?.last_name} ({selectedMember?.email})?
             </h2>
             <div className="flex justify-between">
               <button
@@ -134,14 +147,14 @@ const AssignTrainer = () => {
         >
           {members.map((member) => (
             <motion.li
-              key={member.id}
+              key={member._id}
               className="flex justify-between py-2 px-4 border-b"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.3 }}
             >
-              <span>{member.name}</span>
-              <span className="text-gray-500">{member.assignedTrainer || "No trainer assigned"}</span>
+              <span>{member.first_name} {member.last_name} ({member.email})</span>
+              <span className="text-gray-500">{member.trainer_id ? `${member.trainer_id.first_name} ${member.trainer_id.last_name}` : "No trainer assigned"}</span>
             </motion.li>
           ))}
         </motion.ul>

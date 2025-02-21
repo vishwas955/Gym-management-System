@@ -1,50 +1,65 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { motion } from "framer-motion";
 
 const ManageFAQ = () => {
-  // Dummy data for FAQ
-  const [faqs, setFaqs] = useState([
-    { id: 1, question: "What are the gym's working hours?", answer: "We are open from 6 AM to 10 PM daily." },
-    { id: 2, question: "Do I need to bring my own equipment?", answer: "No, we provide all necessary gym equipment." },
-    { id: 3, question: "Can I cancel my membership?", answer: "Yes, you can cancel your membership anytime with a 30-day notice." },
-  ]);
-
+  const [faqs, setFaqs] = useState([]);
   const [newQuestion, setNewQuestion] = useState("");
   const [newAnswer, setNewAnswer] = useState("");
   const [editingFAQ, setEditingFAQ] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [faqToDelete, setFaqToDelete] = useState(null);
+  const BASE_API_URL = 'http://localhost:4000/FAQ'
+
+  // Fetch FAQs from backend
+  useEffect(() => {
+    axios
+      .get(`${BASE_API_URL}/get-faq`, { withCredentials : true })
+      .then((res) => setFaqs(res.data))
+      .catch((err) => console.error("Error fetching FAQs:", err));
+  }, []);
 
   // Handle adding a new FAQ
-  const handleAddFAQ = () => {
-    const newFAQ = {
-      id: faqs.length + 1,
-      question: newQuestion,
-      answer: newAnswer,
-    };
-    setFaqs([...faqs, newFAQ]);
-    setNewQuestion("");
-    setNewAnswer("");
+  const handleAddFAQ = async () => {
+    try {
+      const res = await axios.post(`${BASE_API_URL}/add-faq`, { question: newQuestion, answer: newAnswer }, 
+        {withCredentials : true }
+      );
+      setFaqs([...faqs, res.data.faq]);
+      setNewQuestion("");
+      setNewAnswer("");
+    } catch (err) {
+      console.error("Error adding FAQ:", err);
+    }
   };
 
   // Handle updating an existing FAQ
-  const handleUpdateFAQ = () => {
-    const updatedFAQs = faqs.map((faq) =>
-      faq.id === editingFAQ.id
-        ? { ...faq, question: newQuestion, answer: newAnswer }
-        : faq
-    );
-    setFaqs(updatedFAQs);
-    setEditingFAQ(null);
-    setNewQuestion("");
-    setNewAnswer("");
+  const handleUpdateFAQ = async () => {
+    try {
+      const res = await axios.put(`${BASE_API_URL}/update-faq/${editingFAQ._id}`, { question: newQuestion, answer: newAnswer },
+        {withCredentials : true}
+      );
+      setFaqs(faqs.map((faq) => (faq._id === editingFAQ._id ? res.data.faq : faq)));
+      setEditingFAQ(null);
+      setNewQuestion("");
+      setNewAnswer("");
+    } catch (err) {
+      console.error("Error updating FAQ:", err);
+    }
   };
 
   // Handle deleting an FAQ
-  const handleDeleteFAQ = () => {
-    setFaqs(faqs.filter((faq) => faq.id !== faqToDelete.id));
-    setDeleteConfirm(false);
-    setFaqToDelete(null);
+  const handleDeleteFAQ = async () => {
+    try {
+      await axios.delete(`${BASE_API_URL}/delete-faq/${faqToDelete._id}`, 
+        {withCredentials : true }
+      );
+      setFaqs(faqs.filter((faq) => faq._id !== faqToDelete._id));
+      setDeleteConfirm(false);
+      setFaqToDelete(null);
+    } catch (err) {
+      console.error("Error deleting FAQ:", err);
+    }
   };
 
   return (
@@ -52,12 +67,7 @@ const ManageFAQ = () => {
       <h1 className="text-2xl font-bold mb-4">Manage FAQ</h1>
 
       {/* Add or Edit FAQ Form */}
-      <motion.div
-        className="mb-6"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-      >
+      <motion.div className="mb-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
         <div className="mb-4">
           <label className="block text-lg font-medium mb-2">Question</label>
           <input
@@ -91,26 +101,11 @@ const ManageFAQ = () => {
       </motion.div>
 
       {/* FAQ List */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-      >
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
         <h2 className="text-xl font-bold mb-4">Frequently Asked Questions</h2>
-        <motion.ul
-          className="space-y-4"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-        >
+        <motion.ul className="space-y-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
           {faqs.map((faq) => (
-            <motion.li
-              key={faq.id}
-              className="border-b py-4"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.3 }}
-            >
+            <motion.li key={faq._id} className="border-b py-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
               <div className="flex justify-between">
                 <div>
                   <p className="text-lg font-semibold">{faq.question}</p>
@@ -145,32 +140,14 @@ const ManageFAQ = () => {
 
       {/* Delete Confirmation Modal */}
       {deleteConfirm && (
-        <motion.div
-          className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
-        >
-          <motion.div
-            className="bg-white p-6 rounded-lg shadow-lg w-1/3"
-            initial={{ scale: 0.8 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.3 }}
-          >
-            <h2 className="text-xl font-bold mb-4">
-              Are you sure you want to delete this FAQ?
-            </h2>
+        <motion.div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+          <motion.div className="bg-white p-6 rounded-lg shadow-lg w-1/3" initial={{ scale: 0.8 }} animate={{ scale: 1 }} transition={{ duration: 0.3 }}>
+            <h2 className="text-xl font-bold mb-4">Are you sure you want to delete this FAQ?</h2>
             <div className="flex justify-between">
-              <button
-                onClick={handleDeleteFAQ}
-                className="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600"
-              >
+              <button onClick={handleDeleteFAQ} className="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600">
                 Yes, Delete
               </button>
-              <button
-                onClick={() => setDeleteConfirm(false)}
-                className="bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600"
-              >
+              <button onClick={() => setDeleteConfirm(false)} className="bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600">
                 Cancel
               </button>
             </div>

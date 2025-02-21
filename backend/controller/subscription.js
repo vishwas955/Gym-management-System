@@ -29,8 +29,9 @@ exports.addsubscription = async (req,res) => {
 
 exports.UpdateSubscription = async (req,res) => {
     try {
-        const {name, duration, details, price, _id} = req.body;
-        const subscription = await subscription_model.findById({_id});
+        const  id  = req.params.id;
+        const {name, duration, details, price } = req.body;
+        const subscription = await subscription_model.findById(id);
 
         if (subscription){
             subscription.price = price;
@@ -60,9 +61,9 @@ exports.UpdateSubscription = async (req,res) => {
 
 exports.deleteSubscription = async (req, res) => {
     try {
-        const { _id } = req.body;
-        const subscription = await subscription_model.findByIdAndDelete(_id);
-        
+        const  id  = req.params.id;
+        const subscription = await subscription_model.findByIdAndDelete(id);
+    
         if (!subscription) {
             return res.status(404).json({
                 error: 'Subscription plan not found!'
@@ -84,9 +85,9 @@ exports.deleteSubscription = async (req, res) => {
 exports.getSubscription = async (req,res) => {
     try {
         const SubsPlans = await subscription_model.find();
-        res.status(200).json({
+        res.status(200).json(
             SubsPlans
-        });
+        );
     } catch (err) {
         console.log(err);
         return res.status(500).json({

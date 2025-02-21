@@ -18,8 +18,13 @@ const membershipSchema = new mongoose.Schema({
     endDate: {
         type: Date,
         required: true
+    },
+    status:{
+        type: String,
+        enum: ["Active", "Expired", "Cancelled"],
+        default: "Active",
     }
-});
+}, { timestamps: true });
 
 const Membership = mongoose.model('Membership', membershipSchema);
 module.exports = Membership;

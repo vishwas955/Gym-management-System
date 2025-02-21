@@ -19,6 +19,27 @@ app.use('/auth/User',Userroutes);
 const Subscriptionroutes = require('./route/subscription');
 app.use('/subscription',Subscriptionroutes);
 
+const MemberShiproutes = require('./route/Membership');
+app.use('/membership',MemberShiproutes);
+
+/*
+    All the Trainer related in the User Model Route through here 
+        - Assign Trainer
+        - Get Trainer Data That is assigned
+        - Get Trainer Data 
+        - View Assigned Member 
+*/
+const TrainerRoutes = require('./route/TrainerRoutes');
+app.use('/trainer',TrainerRoutes);
+
+const FAQRoutes = require('./route/FAQ');
+app.use('/FAQ', FAQRoutes);
+
+const FeedbackRoutes = require('./route/Feedback');
+app.use('/feedback', FeedbackRoutes);
+
+const PaymentRoutes = require('./route/Payment');
+app.use('/payment', PaymentRoutes);
 
 app.listen(Port,() => {
     console.log("The Server is runing perfectly!");

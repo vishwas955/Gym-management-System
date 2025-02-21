@@ -1,4 +1,3 @@
-const { Transaction } = require("mongodb");
 const mongoose = require("mongoose");
 
 // schema for payment details of the gym member that contains payment details of every member 
@@ -11,11 +10,7 @@ const paymentSchema = new mongoose.Schema({
     },
     gym_member_id: { 
         type: mongoose.Schema.Types.ObjectId, 
-        ref: "GymMember", 
-        required: true 
-    },
-    payment_date: { 
-        type: Date, 
+        ref: "User", 
         required: true 
     },
     amount: { 
@@ -31,8 +26,8 @@ const paymentSchema = new mongoose.Schema({
         enum: ["Pending", "Completed","Failed"], 
         required: true 
     },
-  });
+  },{timestamps:true});
 
 //Exporting the payment table
-const Payment = mongoose.model("Payment",payment_schema);
+const Payment = mongoose.model("Payment",paymentSchema);
 module.exports = Payment;

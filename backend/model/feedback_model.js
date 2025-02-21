@@ -10,7 +10,7 @@ const feedbackSchema = new mongoose.Schema({
         type: String,
         required: true
     }
-});
+},{timestamps:true});
 
 const Feedback = mongoose.model('Feedback', feedbackSchema);
 module.exports = Feedback;

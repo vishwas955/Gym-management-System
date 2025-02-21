@@ -1,31 +1,51 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import axios from "axios";
+const BASE_API_URL = 'http://localhost:4000/feedback'
 
 const Feedback = () => {
-  const [feedbacks, setFeedbacks] = useState([
-    { id: 1, user: "John Doe", message: "Great service!", date: "2025-01-25" },
-    { id: 2, user: "Jane Smith", message: "Very helpful staff!", date: "2025-01-26" },
-    { id: 3, user: "Michael Lee", message: "Amazing workout plans.", date: "2025-01-27" },
-    { id: 4, user: "Sara Green", message: "Love the gym environment.", date: "2025-01-28" }
-  ]);
-
+  const [feedbacks, setFeedbacks] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [feedbackToDelete, setFeedbackToDelete] = useState(null);
 
+  // Fetch feedbacks from backend
+  useEffect(() => {
+    fetchFeedbacks();
+  }, []);
+
+  const fetchFeedbacks = async () => {
+    try {
+      const response = await axios.get(`${BASE_API_URL}/get-feedback`,
+        {withCredentials : true }
+      );
+      setFeedbacks(response.data);
+    } catch (error) {
+      console.error("Error fetching feedbacks:", error);
+    }
+  };
+
+  // Handle deleting feedback
+  const handleDeleteFeedback = async () => {
+    try {
+      await axios.delete(`${BASE_API_URL}/delete-feedback/${feedbackToDelete._id}`,
+        {withCredentials : true }
+      );
+      setFeedbacks(feedbacks.filter((feedback) => feedback._id !== feedbackToDelete._id));
+      setDeleteConfirm(false);
+      setFeedbackToDelete(null);
+    } catch (error) {
+      console.error("Error deleting feedback:", error);
+    }
+  };
+
   // Filter feedback based on search query
   const filteredFeedbacks = feedbacks.filter(
     (feedback) =>
-      feedback.user.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      feedback.message.toLowerCase().includes(searchQuery.toLowerCase())
+      feedback.user?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      feedback.user?.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      feedback.feedbackText.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  // Handle deleting feedback
-  const handleDeleteFeedback = () => {
-    setFeedbacks(feedbacks.filter((feedback) => feedback.id !== feedbackToDelete.id));
-    setDeleteConfirm(false);
-    setFeedbackToDelete(null);
-  };
 
   return (
     <div className="p-6">
@@ -34,7 +54,7 @@ const Feedback = () => {
       {/* Search Bar */}
       <input
         type="text"
-        placeholder="Search by user name or feedback"
+        placeholder="Search by user name, email, or feedback"
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         className="mb-4 p-2 border border-gray-300 rounded w-full"
@@ -50,6 +70,7 @@ const Feedback = () => {
         <thead>
           <tr>
             <th className="py-3 px-6 border-b">User</th>
+            <th className="py-3 px-6 border-b">Email</th>
             <th className="py-3 px-6 border-b">Feedback</th>
             <th className="py-3 px-6 border-b">Date</th>
             <th className="py-3 px-6 border-b">Actions</th>
@@ -58,14 +79,17 @@ const Feedback = () => {
         <tbody>
           {filteredFeedbacks.map((feedback) => (
             <motion.tr
-              key={feedback.id}
+              key={feedback._id}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.3 }}
             >
-              <td className="py-4 px-6 border-b text-center">{feedback.user}</td>
-              <td className="py-4 px-6 border-b text-center">{feedback.message}</td>
-              <td className="py-4 px-6 border-b text-center">{new Date(feedback.date).toLocaleDateString()}</td>
+              <td className="py-4 px-6 border-b text-center">
+                {feedback.userID?.first_name} {feedback.userID?.last_name}
+                </td>
+              <td className="py-4 px-6 border-b text-center">{feedback.userID?.email}</td>
+              <td className="py-4 px-6 border-b text-center">{feedback.feedbackText}</td>
+              <td className="py-4 px-6 border-b text-center">{new Date(feedback.createdAt).toLocaleDateString()}</td>
               <td className="py-4 px-6 border-b text-center">
                 <button
                   className="text-red-500 hover:text-red-700"
