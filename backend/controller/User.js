@@ -296,4 +296,8 @@ exports.getAssignedTrainers = async (req, res) => {
             error: 'Internal Server Error!', success : false
         });
     }
+<<<<<<< HEAD
 };
+=======
+};
+>>>>>>> be89ed79ae96f310cce4fdf4460d1d1022292e25
