@@ -31,7 +31,6 @@ app.use('/membership',MemberShiproutes);
 */
 const TrainerRoutes = require('./route/TrainerRoutes');
 app.use('/trainer',TrainerRoutes);
-<<<<<<< HEAD
 
 const FAQRoutes = require('./route/FAQ');
 app.use('/FAQ', FAQRoutes);
@@ -41,8 +40,13 @@ app.use('/feedback', FeedbackRoutes);
 
 const PaymentRoutes = require('./route/Payment');
 app.use('/payment', PaymentRoutes);
-=======
->>>>>>> be89ed79ae96f310cce4fdf4460d1d1022292e25
+
+const ExerciseRoutes = require('./route/Exercise');
+app.use('/exercise', ExerciseRoutes);
+
+//Workout plan endpoints 
+const WO_PlanRoutes = require('./route/workout_plan');
+app.use('/WO-plan', WO_PlanRoutes);
 
 app.listen(Port,() => {
     console.log("The Server is runing perfectly!");

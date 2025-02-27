@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const SendEmail = require('../utils/SendEmail');
+const WorkoutPlan = require('../model/workout_plan_model');
 
 
 
@@ -296,8 +297,40 @@ exports.getAssignedTrainers = async (req, res) => {
             error: 'Internal Server Error!', success : false
         });
     }
-<<<<<<< HEAD
 };
-=======
-};
->>>>>>> be89ed79ae96f310cce4fdf4460d1d1022292e25
+
+
+
+// exports.assignWorkoutPlan = async (req,res) => {
+//     try {
+//         const { UserId } = req.params;
+//         const { WorkoutPlanId } = req.body;
+
+//         console.log(`Assigning Workout plan with id : ${WorkoutPlanId} to Gym-Member Id : ${UserId}`);
+
+//         // check if the workout plan exists 
+//         const workoutPlan = await WorkoutPlan.findById({WorkoutPlanId});
+//         if (!workoutPlan){
+//             return res.status(404).json({error: "The Workout Plan not found !"});
+//         }
+
+//         // check if the User exists 
+//         const gymMember = await User.findById({UserId});
+//         if (!gymMember){
+//             return res.status(404).json({error: "The Gym-Member not found !"});
+//         }
+
+//         //Assign the WorkoutPlan to the Gym-member
+//         gymMember.workoutPlanId = WorkoutPlanId;
+//         await gymMember.save();
+
+//         console.log(`WorkOut Plan assigned successfully to the Gym-Member ${gymMember.first_name} ${gymMember.last_name} !`);
+
+//         res.status(200).json({message : " The Workout Plan assigned Successfully! ", gymMember});
+//     } catch (error) {
+//         console.log(error);
+//         return res.status(500).json({
+//             error: 'Internal Server Error!', success : false
+//         });
+//     }
+// }
