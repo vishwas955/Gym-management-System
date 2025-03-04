@@ -71,9 +71,18 @@ function Login({setUserType}) {
       setFormMessages([backendError]);
     }
   };
-
+  const backgroundImageStyle = {
+    backgroundImage: `url('/images/reg.jpg')`,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    minHeight: "100vh",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  };
   return (
-    <div className="login flex flex-col items-center justify-center bg-gray-100 p-16 rounded-xl shadow-lg transform transition-transform duration-300 ease-in-out">
+    <div className="login" style={backgroundImageStyle}>
+    <div className="bg-white p-16 rounded-xl shadow-lg transform transition-transform duration-300 ease-in-out w-1/3 mr-90">
       <section className="w-full max-w-md">
         <h2 className="text-2xl font-semibold text-center text-gray-700 mb-6">
           Login to Your Account
@@ -114,22 +123,52 @@ function Login({setUserType}) {
               </span>
             )}
           </div>
-
           <div>
-            <label htmlFor="userType" className="block text-sm font-medium text-gray-600">
+            <label className="block text-sm font-medium text-gray-600">
               User Type:
             </label>
-            <select
-              id="role"
-              name="userType"
-              required
-              className="mt-2 block w-full px-4 py-2 border rounded-md border-gray-300 focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Select User Type</option>
-              <option value="Admin">Admin</option>
-              <option value="Trainer">Trainer</option>
-              <option value="Member">User</option>
-            </select>
+            <div className="mt-2 flex space-x-4">
+              {/* Use flex and space-x-4 for horizontal alignment */}
+              <div className="flex items-center">
+                <input
+                  type="radio"
+                  id="admin"
+                  name="userType"
+                  value="Admin"
+                  required
+                  className="mr-2 h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                />
+                <label htmlFor="admin" className="text-gray-700">
+                  Admin
+                </label>
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="radio"
+                  id="trainer"
+                  name="userType"
+                  value="Trainer"
+                  required
+                  className="mr-2 h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                />
+                <label htmlFor="trainer" className="text-gray-700">
+                  Trainer
+                </label>
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="radio"
+                  id="member"
+                  name="userType"
+                  value="Member"
+                  required
+                  className="mr-2 h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                />
+                <label htmlFor="member" className="text-gray-700">
+                  Gym member
+                </label>
+              </div>
+            </div>
             {formMessages.find((msg) => msg.includes("user type")) && (
               <span className="text-red-500 text-xs mt-1">
                 {formMessages.find((msg) => msg.includes("user type"))}
@@ -162,7 +201,7 @@ function Login({setUserType}) {
         )}
 
         <div className="mt-6 text-center text-sm text-gray-600">
-          <Link to="/forgot-password" className="text-blue-500 hover:underline">
+          <Link to="/forgotpassword" className="text-blue-500 hover:underline">
             Forgot Password?
           </Link>
           <p className="mt-3">
@@ -174,6 +213,7 @@ function Login({setUserType}) {
         </div>
       </section>
     </div>
+  </div>
   );
 }
 

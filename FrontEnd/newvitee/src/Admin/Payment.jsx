@@ -41,7 +41,7 @@ const ManagePayments = () => {
 
     return (
         <div className="p-8 bg-gray-100 min-h-screen">
-            <h1 className="text-3xl font-bold mb-6 text-gray-800">Manage Payments</h1>
+            <h1 className="text-3xl font-bold mb-6 text-gray-800">Payment History</h1>
 
             {/* Search Bar */}
             <div className="mb-6">

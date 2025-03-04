@@ -9,7 +9,7 @@ const WorkoutPlan = require('../model/workout_plan_model');
 
 
 
-//Logout function 
+//register 
 exports.register = async (req,res) => {
     try{
         const {first_name,last_name,gender,role,email,password,phone_number,dob} = req.body;
@@ -42,17 +42,12 @@ exports.register = async (req,res) => {
 
 
 
-
 //cookie options 
 const cookieOptions = {
     httpOnly:true,
     secure:false,//true for production 
     sameSite: 'Lax',
 };
-
-
-
-
 //login function 
 exports.login = async (req,res) => {
     try{
@@ -125,7 +120,7 @@ exports.forgotPassword = async (req, res) => {
         await user.save();
 
         // Fix: Correct reset URL
-        const resetUrl = `${process.env.REACT_APP_FRONTEND_URL}?token=${resetToken}`;
+        const resetUrl = `${process.env.REACT_APP_FRONTEND_URL}/resetpassword?token=${resetToken}`;
 
         // Fix: Correct Email Template Formatting
         const emailContent = `
@@ -215,7 +210,6 @@ exports.resetPassword = async (req, res) => {
 };
 
 
-
 //Get All User that are registered
 exports.GetAllUser = async (req,res) => {
     try { 
@@ -282,12 +276,13 @@ exports.assignTrainer = async (req,res) => {
 //View Assigned Trainer to all Members
 exports.getAssignedTrainers = async (req, res) => {
     try {
-        const membersWithTrainers = await User.find({ role: "Member", trainer_id: { $ne: null } }) 
+        {const { memberId } = req.params;}
+        const membersWithTrainers = await User.find({ role: "Member", _id : memberId,trainer_id: { $ne: null } }) 
             .populate("trainer_id", "first_name last_name email") // Fetch trainer details (name, email)
             .select("first_name last_name email trainer_id"); // Select relevant fields
 
         if (membersWithTrainers.length === 0) {
-            return res.status(404).json({ error: "No members with assigned trainers found" });
+            return res.status(404).json({ error: "No members with assigned trainers found",success : false });
         }
 
         res.status(200).json(membersWithTrainers);
@@ -301,36 +296,81 @@ exports.getAssignedTrainers = async (req, res) => {
 
 
 
-// exports.assignWorkoutPlan = async (req,res) => {
-//     try {
-//         const { UserId } = req.params;
-//         const { WorkoutPlanId } = req.body;
+exports.assignWorkoutPlan = async (req,res) => {
+    try {
+     const  UserId  = req.params.userID;
+     const { WorkoutPlanId }  = req.body;
+   
+     console.log(`Assigning Workout plan with id : ${WorkoutPlanId} to Gym-Member Id : ${UserId}`);
+   
+     // check if the workout plan exists 
+     const workoutPlan = await WorkoutPlan.findById(WorkoutPlanId);
+     if (!workoutPlan){
+      return res.status(404).json({error: "The Workout Plan not found !", success : false});
+     }
+   
+     // check if the User exists 
+     const gymMember = await User.findById(UserId);
+     if (!gymMember){
+      return res.status(404).json({error: "The Gym-Member not found !", success : false});
+     }
+   
+     //Assign the WorkoutPlan to the Gym-member
+     gymMember.workoutPlanId = WorkoutPlanId;
+     await gymMember.save();
+   
+     console.log(`WorkOut Plan assigned successfully to the Gym-Member ${gymMember.first_name} ${gymMember.last_name} !`);
+   
+     res.status(200).json({message : " The Workout Plan assigned Successfully! ", gymMember});
+    } catch (error) {
+     console.log(error);
+     return res.status(500).json({
+      error: 'Internal Server Error!', success : false
+     });
+    }
+   }
 
-//         console.log(`Assigning Workout plan with id : ${WorkoutPlanId} to Gym-Member Id : ${UserId}`);
 
-//         // check if the workout plan exists 
-//         const workoutPlan = await WorkoutPlan.findById({WorkoutPlanId});
-//         if (!workoutPlan){
-//             return res.status(404).json({error: "The Workout Plan not found !"});
-//         }
 
-//         // check if the User exists 
-//         const gymMember = await User.findById({UserId});
-//         if (!gymMember){
-//             return res.status(404).json({error: "The Gym-Member not found !"});
-//         }
+   exports.getAssignedMembers = async (req, res) => {
+    try {
+        const { _id, role } = req.user;
 
-//         //Assign the WorkoutPlan to the Gym-member
-//         gymMember.workoutPlanId = WorkoutPlanId;
-//         await gymMember.save();
+        // Ensure the User is a trainer
+        if (role !== "Trainer") {
+            return res.status(403).json({ message: "Access Denied! Only trainers can see the assigned members.", success: false });
+        }
 
-//         console.log(`WorkOut Plan assigned successfully to the Gym-Member ${gymMember.first_name} ${gymMember.last_name} !`);
+        // Pagination parameters from query string (default values provided)
+        const page = parseInt(req.query.page) || 1; // Current page (default: 1)
+        const limit = parseInt(req.query.limit) || 10; // Number of items per page (default: 10)
 
-//         res.status(200).json({message : " The Workout Plan assigned Successfully! ", gymMember});
-//     } catch (error) {
-//         console.log(error);
-//         return res.status(500).json({
-//             error: 'Internal Server Error!', success : false
-//         });
-//     }
-// }
+        const skip = (page - 1) * limit;  // Calculate the number of documents to skip
+
+        // Count the total number of assigned members (without pagination)
+        const totalAssignedMembers = await User.countDocuments({ trainer_id: _id, role: "Member" });
+
+        // Find assigned members with pagination
+        const assignedMembers = await User.find({ trainer_id: _id, role: "Member" })
+            .skip(skip)
+            .limit(limit);
+
+        if (!assignedMembers.length) {
+            return res.status(404).json({ message: "No members are assigned to the Trainer!", success: false });
+        }
+
+        res.status(200).json({
+            message: "The assigned members are fetched!",
+            assignedMembers,
+            total: totalAssignedMembers, // Send the total count for pagination
+            page,          // Send the current page for client-side use
+            limit,         // Send the limit for client-side use
+            success: true
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            error: 'Internal Server Error!', success: false
+        });
+    }
+};

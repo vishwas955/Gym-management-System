@@ -1,4 +1,5 @@
 const WorkoutPlan = require('../model/workout_plan_model');
+const Exercise = require('../model/exercise_model');
 
 
 
@@ -16,13 +17,25 @@ exports.createWorkoutPlan = async (req, res) => {
 
 exports.getWorkoutPlans = async (req, res) => {
     try {
-        const workoutPlans = await WorkoutPlan.find().populate({
-            path: 'seven_days',
-            populate: { path: 'exercise', model: 'Exercise' }
-        });
-        res.json(workoutPlans);
+        const workoutPlans = await WorkoutPlan.find();
+
+        // Manually populate the nested arrays in seven_days
+        const populatedWorkoutPlans = await Promise.all(workoutPlans.map(async (workoutPlan) => {
+            const populatedSevenDays = await Promise.all(workoutPlan.seven_days.map(async (day) => {
+                return await Promise.all(day.map(async (exerciseId) => {
+                    return await Exercise.findById(exerciseId);
+                }));
+            }));
+
+            // Convert populatedSevenDays to the correct format
+            workoutPlan.seven_days = populatedSevenDays;
+            return workoutPlan;
+        }));
+
+        res.json(populatedWorkoutPlans);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching workout plans', error: error.message });
+        console.log(error);
     }
 };
 

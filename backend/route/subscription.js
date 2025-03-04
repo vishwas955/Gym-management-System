@@ -10,6 +10,6 @@ router.put('/update-subscription/:id',auth.IsAdminAuth,Subscriptioncontroller.Up
 router.delete('/delete-subscription/:id',auth.IsAdminAuth,Subscriptioncontroller.deleteSubscription);
 
 
-router.get('/get-subscription',auth.auth,Subscriptioncontroller.getSubscription);
+router.get('/get-subscription',Subscriptioncontroller.getSubscription);
 
 module.exports = router;

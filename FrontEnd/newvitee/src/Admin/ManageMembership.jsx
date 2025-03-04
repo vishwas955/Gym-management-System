@@ -1,247 +1,275 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const ManageMemberships = () => {
-  const [memberships, setMemberships] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [subscriptions, setSubscriptions] = useState([]);
-  const [newMembership, setNewMembership] = useState({
-    gymMemberId: '',
-    subscriptionId: '',
-    startDate: '',
-  });
-  const [editMembership, setEditMembership] = useState(null);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const perPage = 5;
-  const API_BASE_URL = 'http://localhost:4000/membership'; // Replace with your actual API base URL
+    const [memberships, setMemberships] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+    const [selectedMembership, setSelectedMembership] = useState(null);
+    const [subscriptions, setSubscriptions] = useState([]);
+    const [selectedSubscriptionId, setSelectedSubscriptionId] = useState("");
+    const [newSubscriptionId, setNewSubscriptionId] = useState("");
+    const [newStartDate, setNewStartDate] = useState("");
+    const [showUpdateModal, setShowUpdateModal] = useState(false);
+    const [startDate, setStartDate] = useState("");
+    const [isLoadingSubscriptions, setIsLoadingSubscriptions] = useState(true); // Added loading state
 
-  useEffect(() => {
-    fetchMemberships();
-    fetchUsers();
-    fetchSubscriptions();
-  }, []);
+    useEffect(() => {
+        fetchMemberships();
+        fetchSubscriptions();
+    }, []);
 
-  const fetchUsers = async () => {
-    try {
-      const response = await axios.get("http://localhost:4000/auth/User/get-users",
-        { withCredentials : true }
-      );
-      setUsers(response.data);
-    } catch (error) {
-      setError('Failed to fetch users.');
-    }
-  };
+    useEffect(() => {
+        console.log("Subscriptions State on Render:", subscriptions);
+    }, [subscriptions]);
 
-  const fetchSubscriptions = async () => {
-    try {
-      const response = await axios.get("http://localhost:4000/subscription/get-subscription",
-        { withCredentials : true }
-      );
-      setSubscriptions(response.data);
-    } catch (error) {
-      setError('Failed to fetch subscriptions.');
-    }
-  };
+    const fetchMemberships = async () => {
+        try {
+            const { data } = await axios.get(
+                "http://localhost:4000/membership/get-membership",
+                { withCredentials: true }
+            );
+            setMemberships(data.memberships);
+        } catch (error) {
+            toast.error("Failed to fetch memberships");
+        }
+    };
 
-  const fetchMemberships = async () => {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/get-membership`, {
-        params: {
-          skip: (page - 1) * perPage,
-          limit: perPage,
-        },
-        withCredentials: true, // Move it inside this options object
-      });
-      setMemberships(response.data.memberships);
-    } catch (error) {
-      setError('Failed to fetch memberships.');
-    } finally {
-      setLoading(false);
-    }
-  };
+    const fetchSubscriptions = async () => {
+        setIsLoadingSubscriptions(true); // Start loading
+        try {
+            const { data } = await axios.get("http://localhost:4000/subscription/get-subscription", {
+                withCredentials: true,
+            });
+            setSubscriptions(data.subscriptions || []);
+            console.log("Fetched Subscriptions:", data.subscriptions);
+        } catch (error) {
+            console.error("Failed to fetch subscription plans");
+            setSubscriptions([]);
+            toast.error("Failed to fetch subscription plans");
+        } finally {
+            setIsLoadingSubscriptions(false); // End loading whether success or fail
+        }
+    };
 
-  const handleCreateMembership = async () => {
-    try {
-      const response = await axios.post(`${API_BASE_URL}/add-membership`, newMembership, 
-        { withCredentials : true }
-      );
-      setMemberships([...memberships, response.data.membership]);
-      setNewMembership({ gymMemberId: '', subscriptionId: '', startDate: '' });
-    } catch (error) {
-      setError('Failed to create membership.');
-    }
-  };
+    const handleEditClick = (membership) => {
+        setSelectedMembership(membership);
+        setShowModal(true);
+        setSelectedSubscriptionId(membership.subscriptionId?._id || "");
+        setStartDate(membership.startDate?.split("T")[0] || "");
+        //CRUCIAL:  Open the update modal only *after* subscriptions are loaded
+        //and the `isLoadingSubscriptions` state is false
+    };
 
-  const handleEditMembership = async () => {
-    try {
-      const response = await axios.put(
-        `${API_BASE_URL}/update-membership/${editMembership._id}`,
-        newMembership, 
-        { withCredentials : true }
-      );
-      setMemberships(
-        memberships.map((membership) =>
-          membership._id === editMembership._id ? response.data.membership : membership
-        )
-      );
-      setEditMembership(null);
-    } catch (error) {
-      setError('Failed to update membership.');
-    }
-  };
+    useEffect(() => {
+      if (showModal && !isLoadingSubscriptions) {
+        setShowUpdateModal(true);
+      }
+    }, [showModal, isLoadingSubscriptions]);
 
-  const handleDeleteMembership = async (id) => {
-    try {
-      await axios.delete(`${API_BASE_URL}/delete-membership/${id}`, 
-        { withCredentials : true }
-      );
-      setMemberships(memberships.filter((membership) => membership.id !== id));
-    } catch (error) {
-      setError('Failed to delete membership.');
-    }
-  };
 
-  const handlePageChange = (newPage) => {
-    setPage(newPage);
-    fetchMemberships();
-  };
 
-  return (
-    <div className="p-8 bg-gray-100 min-h-screen">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800">Manage Memberships</h1>
+    const handleCloseModal = () => {
+        setShowModal(false);
+        setSelectedMembership(null);
+        setSelectedSubscriptionId("");
+        setStartDate("");
+        setShowUpdateModal(false); // Also close the update modal on general close
+    };
 
-      {error && <div className="text-red-500 mb-4">{error}</div>}
-      {loading && <div className="mb-4">Loading memberships...</div>}
-
-      {/* Add or Edit Membership Form */}
-      <div className="mt-8 p-6 bg-white shadow-lg rounded-lg">
-        <h2 className="text-2xl font-bold mb-4">{editMembership ? 'Edit Membership' : 'Add New Membership'}</h2>
-        <div className="mb-4">
-          <label className="block text-gray-700">Gym Member</label>
-          <select
-            className="border px-4 py-2 w-full rounded"
-            value={newMembership.gymMemberId}
-            onChange={(e) =>
-              setNewMembership({ ...newMembership, gymMemberId: e.target.value })
+    const handleUpdateMembership = async (e, membershipId) => {
+        e.preventDefault();
+        try {
+            if (!newSubscriptionId || !newStartDate) {
+                toast.error("Please provide valid inputs for updating!");
+                return;
             }
-          >
-            <option value="">Select Gym Member</option>
-            {users.map((user) => (
-              <option key={user._id} value={user._id}>
-                {user.first_name} {user.last_name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700">Subscription</label>
-          <select
-            className="border px-4 py-2 w-full rounded"
-            value={newMembership.subscriptionId}
-            onChange={(e) =>
-              setNewMembership({ ...newMembership, subscriptionId: e.target.value })
-            }
-          >
-            <option value="">Select Subscription</option>
-            {subscriptions.map((subscription) => (
-              <option key={subscription._id} value={subscription._id}>
-                {subscription.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700">Start Date</label>
-          <input
-            type="date"
-            className="border px-4 py-2 w-full rounded"
-            value={newMembership.startDate}
-            onChange={(e) =>
-              setNewMembership({ ...newMembership, startDate: e.target.value })
-            }
-          />
-        </div>
-        <button
-          onClick={editMembership ? handleEditMembership : handleCreateMembership}
-          className="bg-green-500 text-white py-2 px-4 rounded"
-        >
-          {editMembership ? 'Update Membership' : 'Add Membership'}
-        </button>
-      </div>
 
-      {/* Membership Table */}
-      <div className="overflow-x-auto bg-white rounded-lg shadow-lg mt-6">
-        <table className="w-full table-auto">
-          <thead className="bg-blue-900 text-white">
-            <tr>
-              <th className="py-3 px-4">ID</th>
-              <th className="py-3 px-4">Gym Member</th>
-              <th className="py-3 px-4">Subscription</th>
-              <th className="py-3 px-4">Start Date</th>
-              <th className="py-3 px-4">End Date</th>
-              <th className="py-3 px-4">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {memberships.map((membership) => (
-              <tr key={membership.id} className="border-b">
-                <td className="py-3 px-4 text-center">{membership._id}</td>
-                <td className="py-3 px-4 text-center">
-                  {membership.gymMemberId.first_name} {membership.gymMemberId.last_name}
-                </td>
-                <td className="py-3 px-4 text-center">{membership.subscriptionId.name}</td>
-                <td className="py-3 px-4 text-center">{membership.startDate}</td>
-                <td className="py-3 px-4 text-center">{membership.endDate}</td>
-                <td className="py-3 px-4 text-center">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevent row click from triggering delete
-                      handleEditMembership(membership);
-                    }}
-                    className="bg-yellow-500 text-white py-1 px-3 rounded mr-2"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevent event propagation
-                      handleDeleteMembership(membership._id);
-                    }}
-                    className="bg-red-500 text-white py-1 px-3 rounded"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            const payload = {
+                subscriptionId: newSubscriptionId,
+                startDate: newStartDate,
+            };
 
-      {/* Pagination */}
-      <div className="flex justify-between mt-6">
-        <button
-          onClick={() => handlePageChange(page - 1)}
-          className="bg-blue-500 text-white py-2 px-4 rounded"
-          disabled={page === 1}
-        >
-          Prev
-        </button>
-        <span className="py-2 px-4 text-lg">
-          Page {page} of {Math.ceil(memberships.length / perPage)}
-        </span>
-        <button
-          onClick={() => handlePageChange(page + 1)}
-          className="bg-blue-500 text-white py-2 px-4 rounded"
-          disabled={page * perPage >= memberships.length}
-        >
-          Next
-        </button>
-      </div>
-    </div>
-  );
+            const response = await axios.put(
+                `http://localhost:4000/membership/update-membership/${membershipId}`,
+                payload,
+                { withCredentials: true }
+            );
+
+            if (response.data.success) {
+                toast.success("Membership updated successfully!");
+                fetchMemberships();
+                setShowUpdateModal(false);
+                handleCloseModal();
+            } else {
+                toast.error(response.data.error || "Failed to update membership");
+            }
+        } catch (error) {
+            console.error("Update Error:", error);
+            toast.error("An error occurred while updating the membership");
+        }
+    };
+
+    const handleDisableMembership = async () => {
+        if (window.confirm("Are you sure you want to disable this membership?")) {
+            try {
+                await axios.delete(
+                    `http://localhost:4000/membership/delete-membership/${selectedMembership?._id}`,
+                    { withCredentials: true }
+                );
+                toast.success("Membership disabled successfully");
+                fetchMemberships();
+                handleCloseModal();
+            } catch (error) {
+                toast.error("Failed to disable membership");
+            }
+        }
+    };
+
+    return (
+        <div className="p-4">
+            <h1 className="text-2xl font-bold mb-4">Memberships</h1>
+            <div className="grid grid-cols-2 gap-4">
+                {memberships?.map((membership) => (
+                    <div key={membership._id} className="p-4 border rounded-lg shadow">
+                        <div className="flex justify-between mb-2">
+                            <div className="w-1/2">
+                                <strong>Start:</strong>{" "}
+                                <span>{new Date(membership.startDate).toLocaleDateString()}</span>
+                            </div>
+                            <div className="w-1/2 text-right">
+                                <strong>End:</strong>{" "}
+                                <span>{new Date(membership.endDate).toLocaleDateString()}</span>
+                            </div>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <div className="w-1/2">
+                                <strong>Member:</strong>{" "}
+                                <span>
+                                    {membership.gymMemberId?.first_name} {membership.gymMemberId?.last_name}
+                                </span>
+                            </div>
+                            <div className="w-1/2 text-right">
+                                <strong>Status:</strong>{" "}
+                                <span>{membership.status}</span>
+                            </div>
+                        </div>
+                        <button
+                            className="bg-blue-500 text-white px-4 py-2 rounded mt-2 w-full"
+                            onClick={() => handleEditClick(membership)}
+                            disabled={isLoadingSubscriptions}
+                        >
+                            Edit
+                        </button>
+
+                    </div>
+                ))}
+            </div>
+
+            {showModal && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                    <div className="bg-white p-6 rounded shadow-lg">
+                        <h2 className="text-xl mb-4">Edit Membership</h2>
+                        <p>Membership ID: {selectedMembership?._id}</p>
+                        <p>Status: {selectedMembership?.status}</p>
+
+                        {selectedMembership?.status !== "Cancelled" ? (
+                            <>
+                                <button
+                                    className="bg-green-500 text-white px-4 py-2 rounded mr-2"
+                                    onClick={() => setShowUpdateModal(true)}
+                                    disabled={isLoadingSubscriptions}
+                                >
+                                    Update Membership
+                                </button>
+                                {isLoadingSubscriptions && <p>Loading subscriptions...</p>}
+
+                                <button
+                                    className="bg-red-500 text-white px-4 py-2 rounded"
+                                    onClick={() => handleDisableMembership(selectedMembership?._id)}
+                                >
+                                    Disable Membership
+                                </button>
+                            </>
+                        ) : (
+                            <button
+                                className="bg-green-500 text-white px-4 py-2 rounded"
+                                onClick={() => setShowUpdateModal(true)}
+                                disabled={isLoadingSubscriptions}
+                            >
+                                Update Membership
+                            </button>
+                        )}
+
+                        <button
+                            className="bg-gray-500 text-white px-4 py-2 rounded mt-4"
+                            onClick={handleCloseModal}
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {showUpdateModal && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                    <div className="bg-white p-6 rounded shadow-lg">
+                        <h2 className="text-xl mb-4">Update Membership Details</h2>
+
+                        <form
+                            onSubmit={(e) => handleUpdateMembership(e, selectedMembership?._id)}
+                        >
+                            <div className="mb-4">
+                                <label className="block mb-2 font-semibold">Select New Subscription Plan:</label>
+                                <select
+                                    className="border p-2 rounded w-full mb-4"
+                                    value={newSubscriptionId}
+                                    onChange={(e) => setNewSubscriptionId(e.target.value)}
+                                    disabled={isLoadingSubscriptions}
+                                >
+                                    <option value="">Select Subscription Plan</option>
+                                    {subscriptions && subscriptions.length > 0 ? (
+                                        subscriptions.map((subscription) => (
+                                            <option key={subscription._id} value={subscription._id}>
+                                                {subscription.name} - {subscription.duration} months
+                                            </option>
+                                        ))
+                                    ) : (
+                                        <option disabled>No Subscription Plans Available</option>
+                                    )}
+                                </select>
+                            </div>
+
+                            <div className="mb-4">
+                                <label className="block mb-2 font-semibold">New Start Date:</label>
+                                <input
+                                    type="date"
+                                    value={newStartDate}
+                                    onChange={(e) => setNewStartDate(e.target.value)}
+                                    className="border p-2 rounded w-full"
+                                    required
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
+                            >
+                                Confirm Update
+                            </button>
+
+                            <button
+                                className="bg-gray-500 text-white px-4 py-2 rounded"
+                                onClick={() => setShowUpdateModal(false)}
+                            >
+                                Cancel
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
 };
 
 export default ManageMemberships;

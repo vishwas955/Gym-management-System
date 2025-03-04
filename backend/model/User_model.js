@@ -70,10 +70,10 @@ const userSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
-    // workoutPlanId: {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: 'WorkoutPlan'
-    // },
+    workoutPlanId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'WorkoutPlan'
+    },
     // Optional fields for trainers
     expertise: {
         type: String

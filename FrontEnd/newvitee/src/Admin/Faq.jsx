@@ -64,7 +64,7 @@ const ManageFAQ = () => {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Manage FAQ</h1>
+      <h1 className="text-2xl font-bold mb-4">FAQ</h1>
 
       {/* Add or Edit FAQ Form */}
       <motion.div className="mb-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>

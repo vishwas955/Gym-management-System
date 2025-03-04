@@ -8,6 +8,6 @@ router.post('/add-plan',auth.auth, WO_Plancontroller.createWorkoutPlan );
 router.put('/update-plan/:id',auth.auth, WO_Plancontroller.updateWorkoutPlan );
 router.delete('/delete-plan/:id',auth.auth, WO_Plancontroller.deleteWorkoutPlan );
 router.get('/get-plan',auth.auth , WO_Plancontroller.getWorkoutPlans );
-//router.put('/assign-WOPlan/:userID',auth.auth, Usercontroller.assignWorkoutPlan );
+router.put('/assign-WOPlan/:userID',auth.auth, Usercontroller.assignWorkoutPlan );
 
 module.exports = router;

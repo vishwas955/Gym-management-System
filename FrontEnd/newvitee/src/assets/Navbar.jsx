@@ -3,11 +3,17 @@ import { Link } from 'react-router-dom';
 
 export default function Navbar() {
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-gray-800 text-white shadow-md">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-black text-white shadow-md">
       <div className="container mx-auto flex items-center justify-between px-6 py-4">
-        <div className="text-2xl font-bold">
-          <h1>Caliber Fitness</h1>
-        </div>
+        {/* Logo */}
+      <div className="flex items-center space-x-2">
+        <img
+          src="/images/Caliber_Logo.jpg" // Path to your logo image in the public folder
+          alt="Logo"
+          className="h-10 w-10" // Adjust size as needed
+        />
+        <span className="text-5xl fontfamily-Abhaya font-bold">Caliber Fitness</span>
+      </div>
         <nav>
           <ul className="flex space-x-6">
             <li>
