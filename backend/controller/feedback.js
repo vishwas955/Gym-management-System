@@ -56,3 +56,17 @@ exports.deleteFeedback = async (req, res) => {
         res.status(500).json({ message: "Internal Server Error" });
     }
 };
+
+
+
+exports.getTrainerFeedbacks = async (req, res) => {
+    try {
+        const feedbacks = await Feedback.find()
+            .select('feedbackText createdAt'); // Select relevant fields
+
+        res.status(200).json(feedbacks);
+    } catch (error) {
+        console.error("Error fetching feedbacks:", error);
+        res.status(500).json({ message: "Internal Server Error", success: false });
+    }
+};

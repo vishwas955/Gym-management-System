@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import axios from "axios";
 
-
-const Header = () => {
+const TrHeader = () => {
   const navigate = useNavigate();
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -11,9 +10,16 @@ const Header = () => {
     setShowConfirm(true);
   };
 
-  const confirmLogout = (confirm) => {
+  const confirmLogout = async (confirm) => {
     if (confirm) {
-      navigate("/login");
+      try {
+        await axios.post("http://localhost:4000/auth/User/logout",{},{
+          withCredentials : true
+        });
+        navigate("/login");
+      } catch (error) {
+        console.error("Logout failed:", error);
+      }
     }
     setShowConfirm(false);
   };
@@ -50,7 +56,7 @@ const Header = () => {
               >
                 No
               </button>
-            </div>
+            </div> 
           </div>
         </div>
       )}
@@ -58,4 +64,4 @@ const Header = () => {
   );
 };
 
-export default Header;
+export default TrHeader;

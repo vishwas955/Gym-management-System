@@ -5,11 +5,11 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const SendEmail = require('../utils/SendEmail');
 const WorkoutPlan = require('../model/workout_plan_model');
+const e = require('express');
 
 
 
-
-//register 
+//Register The User
 exports.register = async (req,res) => {
     try{
         const {first_name,last_name,gender,role,email,password,phone_number,dob} = req.body;
@@ -211,16 +211,16 @@ exports.resetPassword = async (req, res) => {
 
 
 //Get All User that are registered
-exports.GetAllUser = async (req,res) => {
-    try { 
-        //Fetch Users whose role is User 
-        const users = await User.find({role : 'Member'}, "first_name last_name email _id"); // Fetch only necessary fields
-        res.json(users);
-    } catch (error) {
-        console.error("Error during resetPassword:", error);
-        res.status(500).json({ message: "Server error", success: false });
+    exports.GetAllUser = async (req,res) => {
+        try { 
+            //Fetch Users whose role is User 
+            const users = await User.find({role : 'Member'}, "first_name last_name email _id"); // Fetch only necessary fields
+            res.json(users);
+        } catch (error) {
+            console.error("Error during resetPassword:", error);
+            res.status(500).json({ message: "Server error", success: false });
+        }
     }
-}
 
 
 
@@ -230,6 +230,73 @@ exports.GetAllTrainer = async (req,res) => {
         //Fetch Users whose role is Trainer 
         const users = await User.find({role : 'Trainer'}, "first_name last_name email _id"); // Fetch only necessary fields
         res.json(users);
+    } catch (error) {
+        console.error("Error during resetPassword:", error);
+        res.status(500).json({ message: "Server error", success: false });
+    }
+}
+
+
+//Get Particular Trainer Profile
+exports.getTrainerProfile = async (req,res) => {
+    try {
+        const { _id, role } = req.user;
+        
+        //Verify the User is Trainer 
+        if ( role !== "Trainer"){
+            return res.status(403).json({ message : "Access Denied Only Trainer can access their Profile!", success : false });
+        }
+
+        const TrainerProfile = await User.findOne({ _id, role : "Trainer" })
+        .select("first_name last_name email phone_number dob gender address height weight expertise experience certifications");
+
+        if (!TrainerProfile){
+            return res.status(404).json({
+                message: "Trainer profile not found.",
+                success: false
+            });
+        }
+        
+        res.status(200).json({ message : 'Trainer Profile Data fetched Successfully!', success : true, TrainerProfile });
+    } catch (error) {
+        console.error("Error during resetPassword:", error);
+        res.status(500).json({ message: "Server error", success: false });
+    }
+}
+
+
+//Update Trainer Profile 
+exports.UpdateTrainerProfile = async (req,res) => {
+    try {
+        const { _id, role } = req.user;
+        const { height, weight, expertise, experience, certifications, first_name, last_name} = req.body;
+
+        //Verify the User is Trainer
+        if(role !== "Trainer"){
+            return res.status(403).json({ message : "Access Denied Only Trainer can access their Profile!", success : false });
+        }
+
+        const TrainerInfo = await User.findOne({_id, role : "Trainer"});
+
+        if (!TrainerInfo){
+            return res.status(404).json({
+                message: "Trainer profile not found.",
+                success: false
+            });
+        }
+
+        TrainerInfo.height = height;
+        TrainerInfo.first_name = first_name;
+        TrainerInfo.last_name = last_name;
+        TrainerInfo.certifications = certifications;
+        TrainerInfo.experience = experience;
+        TrainerInfo.expertise = expertise;
+        TrainerInfo.weight = weight;
+
+        await TrainerInfo.save();
+
+        res.status(200).json({message : "The Profile has been successfully Updated!", success : true });
+
     } catch (error) {
         console.error("Error during resetPassword:", error);
         res.status(500).json({ message: "Server error", success: false });
@@ -262,7 +329,7 @@ exports.assignTrainer = async (req,res) => {
         member.trainer_id = trainerId;
         await member.save();
 
-        res.status(200).json({ message: "Trainer assigned successfully!", member });
+        res.status(200).json({ message: "Trainer assigned successfully!",member });
     } catch (error) {
         console.log(error);
         return res.status(500).json({
@@ -321,7 +388,7 @@ exports.assignWorkoutPlan = async (req,res) => {
    
      console.log(`WorkOut Plan assigned successfully to the Gym-Member ${gymMember.first_name} ${gymMember.last_name} !`);
    
-     res.status(200).json({message : " The Workout Plan assigned Successfully! ", gymMember});
+     res.status(200).json({message : " The Workout Plan assigned Successfully! ", success : true , gymMember});
     } catch (error) {
      console.log(error);
      return res.status(500).json({
@@ -329,7 +396,6 @@ exports.assignWorkoutPlan = async (req,res) => {
      });
     }
    }
-
 
 
    exports.getAssignedMembers = async (req, res) => {

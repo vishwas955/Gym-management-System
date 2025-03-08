@@ -20,6 +20,10 @@ import Registration from "./assets/Registration.jsx";
 import axios from "axios";
 import ForgotPassword from "./assets/forgotpassword.jsx";
 import ResetPassword from "./assets/resetpassword.jsx";
+import TrSidebar from "./Trainer/TrSidebar.jsx";
+import TrHeader from "./Trainer/TrHeader.jsx";
+import TrProfile from "./Trainer/TrProfile.jsx";
+import AssignWorkoutPlan from './Trainer/TrWkPlan.jsx'
 
 const App = () => {
   const [role, setUserType] = useState(null);
@@ -47,10 +51,12 @@ const App = () => {
 
   return (
     <div className="flex min-h-screen">
-      {role && <Sidebar />}
+      {role === 'Admin' && <Sidebar />}
+      {role === 'Trainer' && <TrSidebar />}
 
       <div className="flex-1">
         {role === 'Admin' && <Header />}
+        {role === 'Trainer' && <TrHeader />}
 
         <main className="p-6 bg-gray-100">
           {!role && !loading && <Navbar />}
@@ -86,6 +92,8 @@ const App = () => {
                 <>
                   <Route path="/Trainer/TrainerDashboard" element={<TrainerDashboard />} /> 
                   <Route path="/Trainer/Feedback" element={<TrFeedback />} />
+                  <Route path="/Trainer/Profile" element={<TrProfile />} />
+                  <Route path="/Trainer/TrWkPlan" element={<AssignWorkoutPlan />} />
                   <Route path="/" element={<TrainerDashboard />} />
                 </>
               ) : role === "Member" ? (

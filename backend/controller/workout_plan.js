@@ -15,29 +15,29 @@ exports.createWorkoutPlan = async (req, res) => {
     }
 };
 
-exports.getWorkoutPlans = async (req, res) => {
-    try {
-        const workoutPlans = await WorkoutPlan.find();
+    exports.getWorkoutPlans = async (req, res) => {
+        try {
+            const workoutPlans = await WorkoutPlan.find();
 
-        // Manually populate the nested arrays in seven_days
-        const populatedWorkoutPlans = await Promise.all(workoutPlans.map(async (workoutPlan) => {
-            const populatedSevenDays = await Promise.all(workoutPlan.seven_days.map(async (day) => {
-                return await Promise.all(day.map(async (exerciseId) => {
-                    return await Exercise.findById(exerciseId);
+            // Manually populate the nested arrays in seven_days
+            const populatedWorkoutPlans = await Promise.all(workoutPlans.map(async (workoutPlan) => {
+                const populatedSevenDays = await Promise.all(workoutPlan.seven_days.map(async (day) => {
+                    return await Promise.all(day.map(async (exerciseId) => {
+                        return await Exercise.findById(exerciseId);
+                    }));
                 }));
+
+                // Convert populatedSevenDays to the correct format
+                workoutPlan.seven_days = populatedSevenDays;
+                return workoutPlan;
             }));
 
-            // Convert populatedSevenDays to the correct format
-            workoutPlan.seven_days = populatedSevenDays;
-            return workoutPlan;
-        }));
-
-        res.json(populatedWorkoutPlans);
-    } catch (error) {
-        res.status(500).json({ message: 'Error fetching workout plans', error: error.message });
-        console.log(error);
-    }
-};
+            res.json(populatedWorkoutPlans);
+        } catch (error) {
+            res.status(500).json({ message: 'Error fetching workout plans', error: error.message });
+            console.log(error);
+        }
+    };
 
 exports.updateWorkoutPlan = async (req, res) => {
     try {

@@ -8,7 +8,7 @@ const TrSidebar = () => { return (
     <h2 className="text-3xl font-extrabold mb-10"> Caliber Fitness</h2>
     <ul className="space-y-6">
       <li>
-        <Link to="/TrainerDashboard" className="block py-3 px-4 rounded-lg hover:bg-blue-800 transition-colors text-lg font-medium">
+        <Link to="/Trainer/TrainerDashboard" className="block py-3 px-4 rounded-lg hover:bg-blue-800 transition-colors text-lg font-medium">
           Dashboard
         </Link>
       </li>
@@ -18,19 +18,19 @@ const TrSidebar = () => { return (
         </Link>
       </li> */}
       <li>
-        <Link to="/TrProfile" className="block py-3 px-4 rounded-lg hover:bg-blue-800 transition-colors text-lg font-medium">
+        <Link to="/Trainer/Profile" className="block py-3 px-4 rounded-lg hover:bg-blue-800 transition-colors text-lg font-medium">
         TrainerProfile
         </Link>
       </li>
       <li>
-      <Link to="/TrWkPlan"
+      <Link to="/Trainer/TrWkPlan"
         className="block py-3 px-4 rounded-lg hover:bg-blue-800 transition-colors text-lg font-medium"
       >
         Workout Plan
       </Link>
       </li>
       <li>
-      <Link to="/TrFeedback"
+      <Link to="/Trainer/Feedback"
         className="block py-3 px-4 rounded-lg hover:bg-blue-800 transition-colors text-lg font-medium"
       >
         Feedback

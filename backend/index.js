@@ -28,6 +28,7 @@ app.use('/membership',MemberShiproutes);
         - Get Trainer Data That is assigned
         - Get Trainer Data 
         - View Assigned Member 
+        - View Trainer feedback
 */
 const TrainerRoutes = require('./route/TrainerRoutes');
 app.use('/trainer',TrainerRoutes);

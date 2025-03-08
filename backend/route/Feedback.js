@@ -8,4 +8,5 @@ router.post('/add-feedback',auth.auth, Feedbackcontroller.createFeedback);
 router.delete('/delete-feedback/:id',auth.IsAdminAuth, Feedbackcontroller.deleteFeedback );
 router.get('/get-feedback',auth.auth, Feedbackcontroller.getAllFeedbacks);
 
+
 module.exports = router;

@@ -12,6 +12,6 @@ router.get("/token-verification",Auth.auth,(req, res) => {
   });
 router.post('/forgot-password',Usercontroller.forgotPassword); //Forget Password route
 router.post('/reset-password',Usercontroller.resetPassword);  //Reset Password route 
-router.get('/get-users',Auth.IsAdminAuth,Usercontroller.GetAllUser); //fetch all the Gym Members from DB
+router.get('/get-users',Auth.auth,Usercontroller.GetAllUser); //fetch all the Gym Members from DB
 
 module.exports = router;
