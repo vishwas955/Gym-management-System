@@ -6,6 +6,7 @@ const nodemailer = require('nodemailer');
 const SendEmail = require('../utils/SendEmail');
 const WorkoutPlan = require('../model/workout_plan_model');
 const e = require('express');
+const Membership = require('../model/membership_model')
 
 
 
@@ -211,24 +212,108 @@ exports.resetPassword = async (req, res) => {
 
 
 //Get All User that are registered
-    exports.GetAllUser = async (req,res) => {
-        try { 
-            //Fetch Users whose role is User 
-            const users = await User.find({role : 'Member'}, "first_name last_name email _id"); // Fetch only necessary fields
-            res.json(users);
-        } catch (error) {
-            console.error("Error during resetPassword:", error);
-            res.status(500).json({ message: "Server error", success: false });
-        }
+exports.GetAllUser = async (req, res) => {
+    try { 
+        // Fetch all users with role "Member"
+        const users = await User.find({ role: 'Member' }, "first_name last_name email _id createdAt");
+
+        // Fetch membership details for these users
+        const memberships = await Membership.find({ gymMemberId: { $in: users.map(user => user._id) } }, "gymMemberId status");
+
+        // Create a mapping of user IDs to membership status
+        const membershipMap = {};
+        memberships.forEach(membership => {
+            membershipMap[membership.gymMemberId.toString()] = membership.status;
+        });
+
+        // Attach membership status to each user
+        const usersWithMembershipStatus = users.map(user => ({
+            ...user._doc,
+            membershipStatus: membershipMap[user._id.toString()] || "No Membership"
+        }));
+
+        // Send the response
+        res.json(usersWithMembershipStatus);
+    } catch (error) {
+        console.error("Error fetching users:", error);
+        res.status(500).json({ message: "Server error", success: false });
     }
+};
+
+
+
+//Get Particular Gym-Member Profile
+exports.getUserProfile = async (req,res) => {
+    try {
+        const { _id, role } = req.user;
+        
+        //Verify the User is Trainer 
+        if ( role !== "Member"){
+            return res.status(403).json({ message : "Access Denied Only Gym-Member can access their Profile!", success : false });
+        }
+
+        const gymMemberProfile = await User.findOne({ _id, role : "Member" })
+        .select("first_name last_name email phone_number dob gender address height weight ");
+
+        if (!gymMemberProfile){
+            return res.status(404).json({
+                message: "Gym-Member profile not found.",
+                success: false
+            });
+        }
+        
+        res.status(200).json({ message : 'Gym-Member Profile Data fetched Successfully!', success : true, gymMemberProfile });
+    } catch (error) {
+        console.error("Error during fetching Gym-Member Data:", error);
+        res.status(500).json({ message: "Server error", success: false });
+    }
+}
+
+
+
+//Update Gym-Member Profile 
+exports.UpdateUserProfile = async (req,res) => {
+    try {
+        const { _id, role } = req.user;
+        const { height, weight, phone_number, first_name, last_name} = req.body;
+
+        //Verify the User is Trainer
+        if(role !== "Member"){
+            return res.status(403).json({ message : "Access Denied Only Gym-Member can access their Profile!", success : false });
+        }
+
+        const gymMemberInfo = await User.findOne({_id, role : "Member"});
+
+        if (!gymMemberInfo){
+            return res.status(404).json({
+                message: "Gym-Member profile not found.",
+                success: false
+            });
+        }
+
+        gymMemberInfo.height = height;
+        gymMemberInfo.first_name = first_name;
+        gymMemberInfo.last_name = last_name;
+        gymMemberInfo.phone_number = phone_number;
+        gymMemberInfo.weight = weight;
+
+        await gymMemberInfo.save();
+
+        res.status(200).json({message : "The Profile has been successfully Updated!", success : true });
+
+    } catch (error) {
+        console.error("Error during Updating the Gym-Member Profile:", error);
+        res.status(500).json({ message: "Server error", success: false });
+    }
+}
 
 
 
 //Get All the Trainer that are registered
 exports.GetAllTrainer = async (req,res) => {
-    try { 
+    try {   
         //Fetch Users whose role is Trainer 
-        const users = await User.find({role : 'Trainer'}, "first_name last_name email _id"); // Fetch only necessary fields
+        const users = await User.find({role : 'Trainer'}, "first_name last_name email _id createdAt"); // Fetch only necessary fields
         res.json(users);
     } catch (error) {
         console.error("Error during resetPassword:", error);
@@ -340,10 +425,10 @@ exports.assignTrainer = async (req,res) => {
 
 
 
-//View Assigned Trainer to all Members
+//View Assigned Trainer to all Members for Admin
 exports.getAssignedTrainers = async (req, res) => {
     try {
-        {const { memberId } = req.params;}
+        const { memberId } = req.params;
         const membersWithTrainers = await User.find({ role: "Member", _id : memberId,trainer_id: { $ne: null } }) 
             .populate("trainer_id", "first_name last_name email") // Fetch trainer details (name, email)
             .select("first_name last_name email trainer_id"); // Select relevant fields
@@ -360,6 +445,30 @@ exports.getAssignedTrainers = async (req, res) => {
         });
     }
 };
+
+
+
+//View Assigned Trainer of a particular Member 
+exports.getAssignedUserTrainer = async (req, res) => {
+    try {
+        const { memberId } = req.user._id;
+        const membersWithTrainers = await User.findOne({ role: "Member", _id : memberId,trainer_id: { $ne: null } }) 
+            .populate("trainer_id", "first_name last_name email expertise experience certifications") // Fetch trainer details (name, email)
+            .select("first_name last_name email trainer_id"); // Select relevant fields
+
+        if (membersWithTrainers.length === 0) {
+            return res.status(404).json({ error: "No Trainers Assigned",success : false });
+        }
+
+        res.status(200).json(membersWithTrainers);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            error: 'Internal Server Error!', success : false
+        });
+    }
+};
+
 
 
 
@@ -398,45 +507,45 @@ exports.assignWorkoutPlan = async (req,res) => {
    }
 
 
-   exports.getAssignedMembers = async (req, res) => {
-    try {
-        const { _id, role } = req.user;
+exports.getAssignedMembers = async (req, res) => {
+try {
+    const { _id, role } = req.user;
 
-        // Ensure the User is a trainer
-        if (role !== "Trainer") {
-            return res.status(403).json({ message: "Access Denied! Only trainers can see the assigned members.", success: false });
-        }
-
-        // Pagination parameters from query string (default values provided)
-        const page = parseInt(req.query.page) || 1; // Current page (default: 1)
-        const limit = parseInt(req.query.limit) || 10; // Number of items per page (default: 10)
-
-        const skip = (page - 1) * limit;  // Calculate the number of documents to skip
-
-        // Count the total number of assigned members (without pagination)
-        const totalAssignedMembers = await User.countDocuments({ trainer_id: _id, role: "Member" });
-
-        // Find assigned members with pagination
-        const assignedMembers = await User.find({ trainer_id: _id, role: "Member" })
-            .skip(skip)
-            .limit(limit);
-
-        if (!assignedMembers.length) {
-            return res.status(404).json({ message: "No members are assigned to the Trainer!", success: false });
-        }
-
-        res.status(200).json({
-            message: "The assigned members are fetched!",
-            assignedMembers,
-            total: totalAssignedMembers, // Send the total count for pagination
-            page,          // Send the current page for client-side use
-            limit,         // Send the limit for client-side use
-            success: true
-        });
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({
-            error: 'Internal Server Error!', success: false
-        });
+    // Ensure the User is a trainer
+    if (role !== "Trainer") {
+        return res.status(403).json({ message: "Access Denied! Only trainers can see the assigned members.", success: false });
     }
+
+    // Pagination parameters from query string (default values provided)
+    const page = parseInt(req.query.page) || 1; // Current page (default: 1)
+    const limit = parseInt(req.query.limit) || 10; // Number of items per page (default: 10)
+
+    const skip = (page - 1) * limit;  // Calculate the number of documents to skip
+
+    // Count the total number of assigned members (without pagination)
+    const totalAssignedMembers = await User.countDocuments({ trainer_id: _id, role: "Member" });
+
+    // Find assigned members with pagination
+    const assignedMembers = await User.find({ trainer_id: _id, role: "Member" })
+        .skip(skip)
+        .limit(limit);
+
+    if (!assignedMembers.length) {
+        return res.status(404).json({ message: "No members are assigned to the Trainer!", success: false });
+    }
+
+    res.status(200).json({
+        message: "The assigned members are fetched!",
+        assignedMembers,
+        total: totalAssignedMembers, // Send the total count for pagination
+        page,          // Send the current page for client-side use
+        limit,         // Send the limit for client-side use
+        success: true
+    });
+} catch (error) {
+    console.error(error);
+    return res.status(500).json({
+        error: 'Internal Server Error!', success: false
+    });
+}
 };

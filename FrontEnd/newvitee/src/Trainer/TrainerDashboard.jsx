@@ -1,33 +1,40 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { FaCheckCircle } from "react-icons/fa"; // Removed FaTimesCircle import
 import axios from "axios";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
+import { FaCalendarAlt } from "react-icons/fa";
 
 const TrainerDashboard = () => {
-    // State for members
-    const [members, setMembers] = useState([]);
+    const [totalMembers, setTotalMembers] = useState(0);
+    const [assignedMembersCount, setAssignedMembersCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [date, setDate] = useState(new Date());
+    const [quote, setQuote] = useState("");
 
-    // Pagination state
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 5; // Show 5 members per page
-    const [totalMembers, setTotalMembers] = useState(0); // Total number of members
+    const quotes = [
+        "🔥 Push yourself because NO ONE else is going to do it for you! ",
+        "💪 Success starts with SELF-DISCIPLINE! ",
+        "🚀 It ALWAYS seems IMPOSSIBLE until it’s DONE! ",
+        "🏋️‍♂️ The BODY achieves what the MIND believes! ",
+        "🏆 Don’t STOP when you’re TIRED. STOP when you’re DONE! ",
+        "🙌 BELIEVE in yourself and ALL that you are! ",
+        "💥 Strength doesn’t come from what you CAN do. It comes from OVERCOMING what you once thought you COULDN’T. "
+    ];
 
     useEffect(() => {
-        // Fetch assigned members from the backend
-        const fetchMembers = async () => {
+        setQuote(quotes[Math.floor(Math.random() * quotes.length)]);
+    }, []);
+
+    useEffect(() => {
+        const fetchDashboardData = async () => {
             try {
-                // Include pagination parameters in the request
-                const response = await axios.get(
-                    `http://localhost:4000/trainer/get-assigned-members?page=${currentPage}&limit=${itemsPerPage}`,
-                    {
-                        withCredentials: true
-                    }
-                );
-                // Axios directly returns the data in response.data
-                setMembers(response.data.assignedMembers);
-                setTotalMembers(response.data.total); // Set the total number of members
+                const totalRes = await axios.get("http://localhost:4000/auth/User/get-users", { withCredentials: true });
+                setTotalMembers(totalRes.data.length); // Count total users
+                
+                const assignedRes = await axios.get("http://localhost:4000/trainer/get-assigned-members", { withCredentials: true });
+                setAssignedMembersCount(assignedRes.data.total);
             } catch (error) {
                 setError(error.message);
             } finally {
@@ -35,94 +42,70 @@ const TrainerDashboard = () => {
             }
         };
 
-        fetchMembers();
-    }, [currentPage, itemsPerPage]);
-
-    // Calculate total pages based on the total number of members
-    const totalPages = Math.ceil(totalMembers / itemsPerPage);
-
-    // Correct the undefined code
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentMembers = members ? members.slice(indexOfFirstItem, indexOfLastItem) : [];
-    // Calculate the total pages.
-    const totalPagesCalculated = Math.ceil((members?.length || 0) / itemsPerPage);
+        fetchDashboardData();
+    }, []);
 
     return (
-        <div className="p-6 bg-blue-900 min-h-screen">
-            <h1 className="text-4xl text-white font-bold text-center mb-10">Trainer Dashboard</h1>
-
-            {/* Dashboard Summary */}
-            <motion.div
-                className="grid grid-cols-1 gap-6 mb-8 max-w-4xl mx-auto"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+        <div className="p-6 bg-indigo-100 min-h-screen">
+            <motion.div 
+                className="bg-gradient-to-r from-purple-400 to-indigo-600 text-white p-8 rounded-lg shadow-xl text-center mb-6 max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
             >
-                <div className="bg-gradient-to-r from-teal-400 to-blue-500 text-white p-6 rounded-lg shadow-xl">
-                    <h2 className="text-2xl font-semibold">Total Members</h2>
-                    <p className="text-4xl font-bold">{loading ? "Loading..." : totalMembers}</p>
+                <div className="text-left">
+                    <h1 className="text-3xl font-bold">Hi, Trainer!</h1>
+                    <p className="text-lg mt-2">Welcome back! Ready to train your members today?</p>
                 </div>
+                <img 
+                    src="https://cdn-icons-png.flaticon.com/512/2922/2922510.png" 
+                    alt="Trainer Illustration" 
+                    className="w-28 h-28 mt-4 md:mt-0"
+                />
             </motion.div>
 
-            {/* Assigned Members List */}
-            <motion.div
-                className="bg-white p-6 rounded-lg shadow-xl"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5 }}
+            <motion.div 
+                className="bg-gradient-to-r from-green-400 to-green-600 text-white p-6 rounded-lg shadow-xl text-center max-w-4xl mx-auto mb-6"
+                whileHover={{ scale: 1.05, rotate: 1, filter: "brightness(1.2)" }}
+                transition={{ duration: 0.3 }}
             >
-                <h2 className="text-2xl font-semibold mb-4 text-gray-700">Assigned Members</h2>
-                {loading ? (
-                    <p className="text-gray-500">Loading members...</p>
-                ) : error ? (
-                    <p className="text-red-500">{error}</p>
-                ) : members?.length > 0 ? (
-                    <ul>
-                        {members.map((member) => (
-                            <li
-                                key={member._id}
-                                className="flex justify-between items-center p-4 mb-4 border-b border-gray-200 rounded-lg hover:bg-gray-50 transition"
-                            >
-                                <div>
-                                    <p className="font-semibold text-lg text-gray-800">
-                                        {member.first_name} {member.last_name}
-                                        <span className="text-sm text-gray-500 ml-2">({member.email})</span> {/* Display email */}
-                                    </p>
-                                    <p className="text-sm text-gray-500">{member.status}</p>
-                                </div>
-                                <div>
-                                    {member.status === "Active" && ( // Show only for Active members
-                                        <FaCheckCircle className="text-green-500 text-xl" />
-                                    )}
-                                </div>
-                            </li>
-                        ))}
-                    </ul>
-                ) : (
-                    <p className="text-gray-500">No members assigned yet.</p>
-                )}
+                <h2 className="text-2xl font-semibold"> Inspiration of the Day </h2>
+                <p className="text-lg font-bold mt-3">{quote}</p>
+            </motion.div>
 
-                {/* Pagination Controls */}
-                <div className="flex justify-center mt-6">
-                    <button
-                        className="px-6 py-2 bg-blue-500 text-white rounded-lg mx-2 hover:bg-blue-600 transition"
-                        onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                        disabled={currentPage === 1}
-                    >
-                        Previous
-                    </button>
-                    <span className="text-lg text-gray-700">
-                        Page {currentPage} of {totalPages}
-                    </span>
-                    <button
-                        className="px-6 py-2 bg-blue-500 text-white rounded-lg mx-2 hover:bg-blue-600 transition"
-                        onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                        disabled={currentPage === totalPages}
-                    >
-                        Next
-                    </button>
+            <motion.div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 max-w-4xl mx-auto">
+                <motion.div 
+                    className="bg-gradient-to-r from-indigo-400 to-indigo-600 text-white p-6 rounded-lg shadow-xl text-center cursor-pointer"
+                    whileHover={{ scale: 1.05, filter: "brightness(1.1)" }}
+                    transition={{ duration: 0.3 }}
+                >
+                    <h2 className="text-2xl font-semibold">Total Members</h2>
+                    <p className="text-4xl font-bold">{loading ? "Loading..." : totalMembers}</p>
+                </motion.div>
+                
+                <motion.div 
+                    className="bg-gradient-to-r from-blue-400 to-blue-600 text-white p-6 rounded-lg shadow-xl text-center cursor-pointer"
+                    whileHover={{ scale: 1.05, filter: "brightness(1.1)" }}
+                    transition={{ duration: 0.3 }}
+                >
+                    <h2 className="text-2xl font-semibold">Assigned Members</h2>
+                    <p className="text-4xl font-bold">{loading ? "Loading..." : assignedMembersCount}</p>
+                </motion.div>
+            </motion.div>
+
+            <motion.div className="bg-white p-6 rounded-lg shadow-xl max-w-3xl mx-auto flex flex-col items-center">
+                <div className="flex items-center text-indigo-600 mb-4">
+                    <FaCalendarAlt className="h-8 w-8 mr-2" />
+                    <h2 className="text-2xl font-semibold">Calendar</h2>
                 </div>
+                <Calendar 
+                    onChange={setDate} 
+                    value={date}
+                    className="rounded-lg shadow-md border border-gray-200 w-full max-w-lg"
+                />
+                <p className="mt-4 text-lg text-gray-600 font-medium text-center">
+                    Selected Date: <span className="text-indigo-600 font-semibold">{date.toDateString()}</span>
+                </p>
             </motion.div>
         </div>
     );

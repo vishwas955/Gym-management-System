@@ -5,7 +5,7 @@ const auth = require('../middlewares/auth');
 
 
 router.post('/add-payment',auth.auth, Paymentcontroller.createPayment );
-// router.delete('/delete-feedback/:id',auth.IsAdminAuth, Paymentcontroller. );
 router.get('/get-payment',auth.IsAdminAuth, Paymentcontroller.getPayments);
+router.get('/get-user-payment',auth.auth, Paymentcontroller.getPaymentsByUserId);
 
 module.exports = router;

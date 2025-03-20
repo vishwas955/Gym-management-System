@@ -23,7 +23,19 @@ import ResetPassword from "./assets/resetpassword.jsx";
 import TrSidebar from "./Trainer/TrSidebar.jsx";
 import TrHeader from "./Trainer/TrHeader.jsx";
 import TrProfile from "./Trainer/TrProfile.jsx";
-import AssignWorkoutPlan from './Trainer/TrWkPlan.jsx'
+import AssignWorkoutPlan from './Trainer/TrWkPlan.jsx';
+import TrAssignedMember from './Trainer/TrAssignedMember.jsx';
+import UserPaymentHistory from './User/UserPaymentHistory.jsx';
+import UserSidebar from './User/UserSidebar.jsx';
+import UserHeader from './User/UserHeader.jsx';
+import UserFeedback from './User/UserFeedback.jsx';
+import UserFaq from './User/UserFaq.jsx';
+import UserTrainer from "./User/UserTrainer.jsx";
+import Reports from "./Admin/Reports.jsx";
+import MembershipReport from "./Admin/MembershipReport.jsx";
+import ManagePayments from "./Admin/ManagePayments.jsx";
+import TrainerReport from "./Admin/TrainerReport.jsx";
+import MemberReport from "./Admin/MemberReport.jsx";
 
 const App = () => {
   const [role, setUserType] = useState(null);
@@ -53,10 +65,12 @@ const App = () => {
     <div className="flex min-h-screen">
       {role === 'Admin' && <Sidebar />}
       {role === 'Trainer' && <TrSidebar />}
+      {role === 'Member' && <UserSidebar />}
 
       <div className="flex-1">
         {role === 'Admin' && <Header />}
         {role === 'Trainer' && <TrHeader />}
+        {role === 'Member' && <UserHeader />}
 
         <main className="p-6 bg-gray-100">
           {!role && !loading && <Navbar />}
@@ -87,6 +101,11 @@ const App = () => {
                   <Route path="/Faq" element={<Faq />} />
                   <Route path="/Feedback" element={<Feedback />} />
                   <Route path="/" element={<AdminDashboard />} />
+                  <Route path="/Reports" element={<Reports />} />
+                  <Route path="/MembershipReport" element={<MembershipReport />} />
+                  <Route path="/ManagePayments" element={<ManagePayments />} />
+                  <Route path="/TrainerReport" element={<TrainerReport />} />
+                  <Route path="/MemberReport" element={<MemberReport />} />
                 </>
               ) : role === "Trainer" ? (
                 <>
@@ -94,11 +113,16 @@ const App = () => {
                   <Route path="/Trainer/Feedback" element={<TrFeedback />} />
                   <Route path="/Trainer/Profile" element={<TrProfile />} />
                   <Route path="/Trainer/TrWkPlan" element={<AssignWorkoutPlan />} />
+                  <Route path="/Trainer/assignedmembers" element={<TrAssignedMember />} />
                   <Route path="/" element={<TrainerDashboard />} />
                 </>
               ) : role === "Member" ? (
                 <>
-                  <Route path="/UserDashboard" element={<UserDashboard />} />
+                  <Route path="/User/UserDashboard" element={<UserDashboard />} />
+                  <Route path="/User/UserPaymentHistory" element={<UserPaymentHistory />} />
+                  <Route path="/User/UserFeedback" element={<UserFeedback />} />
+                  <Route path="/User/UserFAQ" element={<UserFaq />} />
+                  <Route path="/User/AssignedTrainer" element={<UserTrainer />} />
                   <Route path="/" element={<UserDashboard />} />
                 </>
               ) : (

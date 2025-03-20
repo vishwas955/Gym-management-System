@@ -8,7 +8,7 @@ exports.getAllFeedbacks = async (req, res) => {
             .populate('userID', 'first_name last_name email') // Fetch associated user details
             .select('feedbackText userID createdAt'); // Select relevant fields
 
-        res.status(200).json(feedbacks);
+        res.status(200).json({message : "All the feedbacks fetched successfully!", success : true, feedbacks});
     } catch (error) {
         console.error("Error fetching feedbacks:", error);
         res.status(500).json({ message: "Internal Server Error", success: false });
@@ -18,22 +18,27 @@ exports.getAllFeedbacks = async (req, res) => {
 // Create a new Feedback
 exports.createFeedback = async (req, res) => {
     try {
-        const { userID, feedbackText } = req.body;
+        const { _id, role } = req.user;
+        const { feedbackText } = req.body;
 
-        if (!userID || !feedbackText) {
+        if (!_id || !feedbackText) {
             return res.status(400).json({ message: "User ID and Feedback Text are required." });
         }
 
-        // Check if the user exists
-        const user = await User.findById(userID);
-        if (!user) {
-            return res.status(404).json({ message: "User not found." });
+        if ( role !== "Member"){
+            return res.status(403).json({ message : "Access Denied Only Gym-Member can give Feedback!", success : false });
         }
 
-        const newFeedback = new Feedback({ userID, feedbackText });
+        // Check if the user exists
+        const user = await User.findById(_id);
+        if (!user) {
+            return res.status(404).json({ message: "Gym-Member not found." });
+        }
+
+        const newFeedback = new Feedback({ userID : _id, feedbackText });
         await newFeedback.save();
 
-        res.status(201).json({ message: "Feedback created successfully!", feedback: newFeedback });
+        res.status(201).json({ message: "Feedback created successfully!", success : true, feedback: newFeedback.feedbackText });
     } catch (error) {
         console.error("Error creating feedback:", error);
         res.status(500).json({ message: "Internal Server Error" });

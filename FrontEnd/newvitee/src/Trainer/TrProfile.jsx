@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 import axios from "axios";
 
-const TrainerProfile = () => {
+const TrProfile = () => {
     const [trainer, setTrainer] = useState({
         first_name: "",
         last_name: "",
@@ -22,7 +21,7 @@ const TrainerProfile = () => {
 
     useEffect(() => {
         axios
-            .get("http://localhost:4000/trainer/profile", { withCredentials : true })
+            .get("http://localhost:4000/trainer/profile", { withCredentials: true })
             .then((response) => {
                 if (response.data.success) {
                     const trainerData = response.data.TrainerProfile;
@@ -44,17 +43,11 @@ const TrainerProfile = () => {
 
     const validateFields = () => {
         const newErrors = {};
-        if (!trainer.first_name) {
-            newErrors.first_name = "First name is required.";
-        } else if (/[^a-zA-Z ]/.test(trainer.first_name)) {
-            newErrors.first_name = "First name must contain only letters.";
-        }
+        if (!trainer.first_name) newErrors.first_name = "First name is required.";
+        else if (/[^a-zA-Z ]/.test(trainer.first_name)) newErrors.first_name = "First name must contain only letters.";
 
-        if (!trainer.last_name) {
-            newErrors.last_name = "Last name is required.";
-        } else if (/[^a-zA-Z ]/.test(trainer.last_name)) {
-            newErrors.last_name = "Last name must contain only letters.";
-        }
+        if (!trainer.last_name) newErrors.last_name = "Last name is required.";
+        else if (/[^a-zA-Z ]/.test(trainer.last_name)) newErrors.last_name = "Last name must contain only letters.";
 
         if (!/^\d{10}$/.test(trainer.phone_no)) newErrors.phone_no = "Phone number must be 10 digits.";
         if (!trainer.dob) {
@@ -67,9 +60,7 @@ const TrainerProfile = () => {
             if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
                 age--;
             }
-            if (age < 18) {
-                newErrors.dob = "You must be at least 18 years old.";
-            }
+            if (age < 18) newErrors.dob = "You must be at least 18 years old.";
         }
 
         if (!trainer.gender) newErrors.gender = "Gender is required.";
@@ -82,25 +73,29 @@ const TrainerProfile = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (validateFields()) setIsConfirming(true);
+        if (validateFields()) {
+            setIsConfirming(true);
+        }
     };
 
-    const handleConfirmation = (isConfirmed) => {
+    const handleConfirmation = async (isConfirmed) => {
         if (isConfirmed) {
-            axios
-                .put("http://localhost:4000/trainer/profile", trainer,{
-                    withCredentials : true
-                })
-                .then((response) => {
-                    if (response.data.success) {
-                        setUpdateSuccess(true);
-                        setIsEditing(false);
-                        setIsConfirming(false);
-                    } else {
-                        console.error("Failed to update trainer profile:", response.data.message);
-                    }
-                })
-                .catch((error) => console.error("Error updating trainer profile:", error));
+            try {
+                const response = await axios.put(
+                    "http://localhost:4000/trainer/update-profile",
+                    trainer,
+                    { withCredentials: true }
+                );
+                if (response.data.success) {
+                    setUpdateSuccess(true);
+                    setIsEditing(false);
+                    setIsConfirming(false);
+                } else {
+                    console.error("Failed to update trainer profile:", response.data.message);
+                }
+            } catch (error) {
+                console.error("Error updating trainer profile:", error);
+            }
         } else {
             setIsConfirming(false);
         }
@@ -112,7 +107,11 @@ const TrainerProfile = () => {
                 {isEditing ? "Edit Your Profile" : "Your Profile"}
             </h2>
 
-            {updateSuccess && <div className="bg-green-100 text-green-700 p-4 rounded-md mb-6">Profile updated successfully!</div>}
+            {updateSuccess && (
+                <div className="bg-green-100 text-green-700 p-4 rounded-md mb-6">
+                    Profile updated successfully!
+                </div>
+            )}
 
             {!isEditing ? (
                 <div className="space-y-6">
@@ -130,29 +129,36 @@ const TrainerProfile = () => {
                             </div>
                         ))}
                     </div>
-                    <button onClick={() => setIsEditing(true)} className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Edit Profile</button>
+                    <button
+                        onClick={() => setIsEditing(true)}
+                        className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    >
+                        Edit Profile
+                    </button>
                 </div>
             ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {Object.keys(trainer).map((key) => (
                             <div key={key}>
-                                <label className="text-sm text-gray-600 font-medium">{key.replace("_", " ")}</label>
+                                <label className="text-sm text-gray-600 font-medium">
+                                    {key.replace("_", " ")}
+                                </label>
                                 <input
                                     type={key === "dob" ? "date" : "text"}
                                     name={key}
-                                    value={trainer[key]}
+                                    value={trainer[key] || ""}
                                     onChange={handleChange}
                                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
-                                    required
                                 />
                                 {errors[key] && <p className="text-red-500 text-sm">{errors[key]}</p>}
                             </div>
                         ))}
                     </div>
-
                     <div className="flex justify-end">
-                        <button type="submit" className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Save Changes</button>
+                        <button type="submit" className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                            Save Changes
+                        </button>
                     </div>
                 </form>
             )}
@@ -162,8 +168,18 @@ const TrainerProfile = () => {
                     <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm mx-auto">
                         <h3 className="text-lg font-semibold mb-4">Confirm Profile Update?</h3>
                         <div className="flex justify-between">
-                            <button onClick={() => handleConfirmation(true)} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Yes</button>
-                            <button onClick={() => handleConfirmation(false)} className="px-4 py-2 bg-gray-300 text-black rounded-md hover:bg-gray-400">No</button>
+                            <button
+                                onClick={() => handleConfirmation(true)}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                            >
+                                Yes
+                            </button>
+                            <button
+                                onClick={() => handleConfirmation(false)}
+                                className="px-4 py-2 bg-gray-300 text-black rounded-md hover:bg-gray-400"
+                            >
+                                No
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -172,4 +188,4 @@ const TrainerProfile = () => {
     );
 };
 
-export default TrainerProfile;
+export default TrProfile;

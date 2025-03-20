@@ -11,9 +11,9 @@ import {
   EnvelopeIcon,
 } from "@heroicons/react/24/solid";
 
-const Sidebar = () => {
+const UserSidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
-  const [activeItem, setActiveItem] = useState("/AdminDashboard");
+  const [activeItem, setActiveItem] = useState("/User/UserDashboard");
   
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
@@ -74,17 +74,17 @@ const Sidebar = () => {
           isOpen ? "block" : "hidden"
         }`}
       >
-        <h2 className="text-3xl font-extrabold mt-8 mb-10">Hello Admin</h2>
+        <h2 className="text-3xl font-extrabold mt-8 mb-10">Hello Gym Member</h2>
         <ul className="space-y-6">
           <li>
             <Link
-              to="/AdminDashboard"
+              to="/User/UserDashboard"
               className={`block py-3 px-4 rounded-lg transition-colors ${
-                activeItem === "/AdminDashboard"
+                activeItem === "/User/UserDashboard"
                   ? "bg-indigo-800 text-white"
                   : "hover:bg-indigo-800 text-white"
               } flex items-center`}
-              onClick={() => handleItemClick("/AdminDashboard")}
+              onClick={() => handleItemClick("/User/UserDashboard")}
             >
               <HomeIcon className="h-6 w-6 mr-2" />
               Dashboard
@@ -120,7 +120,7 @@ const Sidebar = () => {
           </li>
           <li>
             <Link
-              to="/Payment"
+              to="/User/UserPaymentHistory"
               className={`block py-3 px-4 rounded-lg transition-colors ${
                 activeItem === "/Payment"
                   ? "bg-indigo-800 text-white"
@@ -134,7 +134,7 @@ const Sidebar = () => {
           </li>
           <li>
             <Link
-              to="/AssignTrainer"
+              to="/User/AssignedTrainer"
               className={`block py-3 px-4 rounded-lg transition-colors ${
                 activeItem === "/AssignTrainer"
                   ? "bg-indigo-800 text-white"
@@ -162,13 +162,13 @@ const Sidebar = () => {
           </li>
           <li>
             <Link
-              to="/Faq"
+              to="/User/UserFAQ"
               className={`block py-3 px-4 rounded-lg transition-colors ${
-                activeItem === "/Faq"
+                activeItem === "/User/UserFAQ"
                   ? "bg-indigo-800 text-white"
                   : "hover:bg-indigo-800 text-white"
               } flex items-center`}
-              onClick={() => handleItemClick("/Faq")}
+              onClick={() => handleItemClick("/User/UserFAQ")}
             >
               <QuestionMarkCircleIcon className="h-6 w-6 mr-2" />
               FAQ
@@ -176,7 +176,7 @@ const Sidebar = () => {
           </li>
           <li>
             <Link
-              to="/Feedback"
+              to="/User/UserFeedback"
               className={`block py-3 px-4 rounded-lg transition-colors ${
                 activeItem === "/Feedback"
                   ? "bg-indigo-800 text-white"
@@ -188,14 +188,10 @@ const Sidebar = () => {
               Feedback
             </Link>
           </li>
-          <li>
-            <Link to= "/Reports">
-            Reports</Link>
-          </li>
         </ul>
       </aside>
     </div>
   );
 };
 
-export default Sidebar;
+export default UserSidebar;

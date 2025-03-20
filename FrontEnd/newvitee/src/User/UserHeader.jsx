@@ -4,7 +4,7 @@ import { UserIcon } from "@heroicons/react/24/solid";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 
-const TrHeader = () => {
+const UserHeader = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const navigate = useNavigate();
@@ -48,7 +48,7 @@ const TrHeader = () => {
   return (
     <>
       <header className="bg-indigo-900 text-white p-4 flex justify-between items-center shadow-lg sticky top-0 z-10">
-        <h1 className="text-2xl font-bold">Trainer Dashboard</h1>
+        <h1 className="text-2xl font-bold">Gym Member Dashboard</h1>
 
         <div className="relative">
           <button
@@ -67,7 +67,7 @@ const TrHeader = () => {
                 exit={{ opacity: 0, y: -10 }}
               >
                 <li className="py-2 hover:bg-indigo-800 cursor-pointer">
-                  <Link to="/Trainer/Profile">Profile</Link>
+                  <Link to="/User/UserProfile">Profile</Link>
                 </li>
                 <hr className="my-2 border-indigo-600" />
                 <li
@@ -109,4 +109,4 @@ const TrHeader = () => {
   );
 };
 
-export default TrHeader;
+export default UserHeader;

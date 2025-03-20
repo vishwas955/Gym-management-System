@@ -3,7 +3,7 @@ const Payment = require("../model/payment_model");
 // Create a new payment record
 exports.createPayment = async (req, res) => {
     try {
-        const { transaction_id, gym_member_id, payment_date, amount, method, status } = req.body;
+        const { transaction_id, gym_member_id, amount, method, status } = req.body;
         if (!transaction_id || !gym_member_id || !amount || !method || !status) {
             return res.status(400).json({ message: "All fields are required." });
         }
@@ -67,8 +67,8 @@ exports.getPayments = async (req, res) => {
 // Fetch payments by user ID (Gym member access)
 exports.getPaymentsByUserId = async (req, res) => {
     try {
-        const { userID } = req.params;
-        const payments = await Payment.find({ gym_member_id: userID });
+        const { _id } = req.user;
+        const payments = await Payment.find({ gym_member_id: _id });
         if (!payments.length) {
             return res.status(404).json({ message: "No payments found for this user." });
         }
