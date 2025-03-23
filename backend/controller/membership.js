@@ -154,6 +154,25 @@ exports.getMembership = async (req,res) => {
         console.log(error);
         return res.status(500).json({
             error: 'Internal Server Error!', success : false
-        });
+        }); 
     }
 }
+
+exports.getUserMembership = async (req, res) => {
+    try {
+        const userId = req.user._id;
+
+        // Find membership details
+        const membership = await membership_model.findOne({ gymMemberId: userId }).populate('subscriptionId');
+
+        if (!membership) {
+            return res.status(404).json({ message: "Membership not found", success : true });
+        }
+
+        res.status(200).json({message :" Membership fetched successfully!", membership, success : true});
+    } catch (error) {
+        console.error("Error fetching membership:", error);
+        res.status(500).json({ message: "Server error", success : false });
+    }
+};
+ 

@@ -67,7 +67,7 @@ const UserHeader = () => {
                 exit={{ opacity: 0, y: -10 }}
               >
                 <li className="py-2 hover:bg-indigo-800 cursor-pointer">
-                  <Link to="/User/UserProfile">Profile</Link>
+                  <Link to="/User/Profile">Profile</Link>
                 </li>
                 <hr className="my-2 border-indigo-600" />
                 <li

@@ -1,71 +1,108 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 const UserPaymentHistory = () => {
-  const [paymentHistory, setPaymentHistory] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+    const [payments, setPayments] = useState([]); // Initialize as an empty array
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [perPage] = useState(5);
 
-  useEffect(() => {
-    // Fetch payment history from the backend
-    const fetchPaymentHistory = async () => {
-      try {
-        const response = await axios.get('http://localhost:4000/payment/get-user-payment', {withCredentials: true}); // Replace with your backend endpoint
-        setPaymentHistory(response.data);
-        setIsLoading(false);
-      } catch (err) {
-        console.error('Error fetching payment history:', err);
-        setError('Failed to load payment history.');
-        setIsLoading(false);
-      }
+    // Fetch member payments from the backend with pagination
+    useEffect(() => {
+        const fetchPayments = async () => {
+            try {
+                const response = await axios.get('http://localhost:4000/payment/get-user-payment', {
+                    params: {
+                        page,
+                        limit: perPage,
+                    },
+                    withCredentials: true // Allow cookies to be sent with the request
+                });
+                setPayments(response.data || []); // Ensure payments is always an array
+                setTotalPages(response.data.totalPages || 1);
+            } catch (error) {
+                console.error("Error fetching member payments:", error);
+                setPayments([]); // Fallback to an empty array on error
+            }
+        };
+        fetchPayments();
+    }, [page, perPage]);
+
+    // Handle Pagination
+    const handlePrevPage = () => {
+        if (page > 1) setPage(page - 1);
     };
 
-    fetchPaymentHistory();
-  }, []);
+    const handleNextPage = () => {
+        if (page < totalPages) setPage(page + 1);
+    };
 
-  if (isLoading) {
     return (
-      <div className="max-w-4xl mx-auto p-6 text-center">
-        <h2 className="text-3xl font-semibold text-gray-800 mb-6">Payment History</h2>
-        <p className="text-gray-500">Loading...</p>
-      </div>
+        <div className="p-8 bg-gray-100 min-h-screen">
+            <h1 className="text-3xl font-bold mb-6 text-gray-800">My Payment History</h1>
+
+            {/* Payment Table */}
+            <div className="overflow-x-auto bg-white rounded-lg shadow-lg">
+                <table className="w-full table-auto">
+                    <thead className="bg-blue-900 text-white">
+                        <tr>
+                            <th className="py-3 px-4">Transaction ID</th>
+                            <th className="py-3 px-4">Amount</th>
+                            <th className="py-3 px-4">Date</th>
+                            <th className="py-3 px-4">Method</th>
+                            <th className="py-3 px-4">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {payments.length > 0 ? (
+                            payments.map((payment) => (
+                                <tr key={payment.transaction_id} className="border-b">
+                                    <td className="py-3 px-4">{payment.transaction_id}</td>
+                                    <td className="py-3 px-4">Rs.{payment.amount}</td>
+                                    <td className="py-3 px-4">{new Date(payment.createdAt).toLocaleDateString()}</td>
+                                    <td className="py-3 px-4">{payment.method}</td>
+                                    <td className="py-3 px-4">{payment.status}</td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan={5} className="text-center py-4 text-gray-500">
+                                    No payments found.
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+                <div className="flex justify-between mt-6">
+                    <button
+                        onClick={handlePrevPage}
+                        className={`bg-blue-500 text-white py-2 px-4 rounded ${
+                            page === 1 ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
+                        disabled={page === 1}
+                    >
+                        Prev
+                    </button>
+                    <span className="py-2 px-4 text-lg">
+                        Page {page} of {totalPages}
+                    </span>
+                    <button
+                        onClick={handleNextPage}
+                        className={`bg-blue-500 text-white py-2 px-4 rounded ${
+                            page === totalPages ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
+                        disabled={page === totalPages}
+                    >
+                        Next
+                    </button>
+                </div>
+            )}
+        </div>
     );
-  }
-
-  if (error) {
-    return (
-      <div className="max-w-4xl mx-auto p-6 text-center">
-        <h2 className="text-3xl font-semibold text-gray-800 mb-6">Payment History</h2>
-        <p className="text-red-500">{error}</p>
-      </div>
-    );
-  }
-
-  if (paymentHistory.length === 0) {
-    return (
-      <div className="max-w-4xl mx-auto p-6 text-center">
-        <h2 className="text-3xl font-semibold text-gray-800 mb-6">Payment History</h2>
-        <p className="text-gray-500">No payment history found.</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h2 className="text-3xl font-semibold text-center text-gray-800 mb-6">Payment History</h2>
-
-      {/* Payment History List */}
-      <div className="space-y-4">
-        {paymentHistory.map((payment, index) => (
-          <div key={index} className="p-4 bg-gray-100 rounded-lg shadow-md hover:bg-gray-200 transition duration-300">
-            <h3 className="text-lg font-semibold">{payment.planName}</h3>
-            <p className="text-sm text-gray-600">Amount: {payment.amount}</p>
-            <p className="text-sm text-gray-600">Date: {payment.date}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
 };
 
 export default UserPaymentHistory;

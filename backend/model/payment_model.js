@@ -4,9 +4,14 @@ const mongoose = require("mongoose");
 
 const paymentSchema = new mongoose.Schema({
     transaction_id:{
-        type:Number,
+        type: String, 
         required:true,
-        unique:true
+        unique: true
+    },
+    plan_id:{
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: "Subscription",
+        required:true
     },
     gym_member_id: { 
         type: mongoose.Schema.Types.ObjectId, 

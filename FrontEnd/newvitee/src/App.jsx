@@ -31,11 +31,18 @@ import UserHeader from './User/UserHeader.jsx';
 import UserFeedback from './User/UserFeedback.jsx';
 import UserFaq from './User/UserFaq.jsx';
 import UserTrainer from "./User/UserTrainer.jsx";
+import UserProfile from "./User/UserProfile.jsx";
+import UserMembership from "./User/UserMembership.jsx"
+import UserSubscription from "./User/UserSubscription.jsx";
+import UserMakePayment from "./User/UserMakePayment.jsx";
+import UserWorkoutPlan from "./User/UserWorkoutPlan.jsx"
 import Reports from "./Admin/Reports.jsx";
 import MembershipReport from "./Admin/MembershipReport.jsx";
 import ManagePayments from "./Admin/ManagePayments.jsx";
 import TrainerReport from "./Admin/TrainerReport.jsx";
 import MemberReport from "./Admin/MemberReport.jsx";
+
+
 
 const App = () => {
   const [role, setUserType] = useState(null);
@@ -123,6 +130,11 @@ const App = () => {
                   <Route path="/User/UserFeedback" element={<UserFeedback />} />
                   <Route path="/User/UserFAQ" element={<UserFaq />} />
                   <Route path="/User/AssignedTrainer" element={<UserTrainer />} />
+                  <Route path="/User/Profile" element={<UserProfile />} />
+                  <Route path="/User/UserSubscritpion" element={<UserSubscription />} />
+                  <Route path="/User/UserMembership" element={<UserMembership />} />
+                  <Route path="/User/UserWorkoutPlan" element={<UserWorkoutPlan />} />
+                  <Route path="/User/UserPayment/:planId" element={<UserMakePayment />} />
                   <Route path="/" element={<UserDashboard />} />
                 </>
               ) : (

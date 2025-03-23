@@ -8,7 +8,7 @@ router.put('/assign-trainer/:memberId',auth.IsAdminAuth,Usercontroller.assignTra
     User Cotroller */
 router.get('/get-assigned-trainers/:memberId',auth.auth,Usercontroller.getAssignedTrainers); /* Route to Get all the assigned Trainer
     User Controller*/
-router.get('/get-User-trainer',auth.auth,Usercontroller.getAssignedUserTrainer); /* Route to Get the assigned Trainer of a Particular Gym-Member
+router.get('/get-User-trainer',auth.auth,Usercontroller.getAssignedUserTrainer); /* Route to Get the assigned Trainer of a Particular Gym-Memberx       
 User Controller*/
 router.get('/get-trainers',auth.IsAdminAuth,Usercontroller.GetAllTrainer); /*Fetches all the Trainer data
     User Cotroller */

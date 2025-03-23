@@ -66,12 +66,12 @@ const UserFaq = () => {
     }, [chatHistory]);
 
     return (
-        <div className="max-w-4xl mx-auto mt-10 mb-10 p-0 bg-white shadow-lg rounded-lg border border-gray-200 flex flex-col">
+        <div className="max-w-4xl mx-auto mt-1 mb-10 p-0 bg-white shadow-lg rounded-lg border border-gray-200 flex flex-col">
             <div className="bg-indigo-600 text-white p-4 text-center rounded-t-lg">
                 <h2 className="text-2xl font-semibold">FAQ Chat</h2>
             </div>
 
-            <div className="flex flex-col h-150"> {/* Fixed Height Container */}
+            <div className="flex flex-col h-100"> {/* Fixed Height Container */}
                 <div
                     ref={chatHistoryRef}
                     className="flex-grow overflow-y-auto p-4 space-y-2"  // Enable Scrolling

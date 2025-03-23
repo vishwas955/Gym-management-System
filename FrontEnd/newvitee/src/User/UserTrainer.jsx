@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { FaEnvelope, FaStar } from 'react-icons/fa'; // Import icons
 
 const UserTrainer = () => {
   const [trainer, setTrainer] = useState(null);
@@ -10,15 +11,14 @@ const UserTrainer = () => {
     const fetchAssignedTrainer = async () => {
       try {
         const response = await axios.get("http://localhost:4000/trainer/get-User-trainer", {
-          withCredentials: true, // Send cookies for authentication
+          withCredentials: true,
         });
 
-        if (!response.data || response.data.length === 0) {
+        if (!response.data || !response.data.membersWithTrainers) {
           throw new Error("No assigned trainer found.");
         }
 
-        // Extracting trainer details from the response
-        const memberData = response.data[0]; // Backend returns an array
+        const memberData = response.data.membersWithTrainers;
         setTrainer(memberData.trainer_id);
       } catch (err) {
         setError(err.response?.data?.error || err.message || "Failed to fetch trainer details.");
@@ -50,26 +50,30 @@ const UserTrainer = () => {
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg">
       <h2 className="text-3xl font-semibold text-center text-gray-800 mb-6">Your Assigned Trainer</h2>
 
-      <div className="flex items-center space-x-6 mb-6">
-        <img 
-          src={trainer.imageUrl || "https://via.placeholder.com/150"} 
-          alt={trainer.first_name} 
-          className="w-32 h-32 rounded-full shadow-lg" 
-        />
-        <div>
-          <h3 className="text-2xl font-bold text-gray-800">{trainer.first_name} {trainer.last_name}</h3>
-          <p className="text-lg text-gray-600">Expertise: {trainer.expertise}</p>
-          <p className="text-sm text-gray-500">Experience: {trainer.experience} years</p>
-          <p className="text-sm text-gray-500">Certifications: {trainer.certifications || "N/A"}</p>
-          <p className="text-sm text-gray-500">Contact: {trainer.email}</p>
+      <div className="bg-gray-50 p-6 rounded-lg shadow-md transition-transform transform hover:scale-105">
+        <h3 className="text-2xl font-bold text-gray-800">{trainer.first_name} {trainer.last_name}</h3>
+        
+        <div className="flex items-center space-x-3 mt-2">
+          <span className="text-lg text-gray-600 flex items-center">
+            <FaStar className="text-yellow-500 mr-1" />
+            Expertise: {trainer.expertise}
+          </span>
+          <span className="text-lg text-gray-600 flex items-center">
+            Experience: {trainer.experience} years
+          </span>
         </div>
-      </div>
 
-      <div className="bg-gray-50 p-6 rounded-lg shadow-md">
-        <h3 className="text-xl font-semibold text-gray-800 mb-4">About {trainer.first_name}</h3>
-        <p className="text-gray-600">
-          {trainer.bio || "No additional information available."}
-        </p>
+        <p className="text-sm text-gray-500 mt-2">Certifications: {trainer.certifications || "N/A"}</p>
+
+        <div className="mt-4 flex items-center space-x-2">
+          <FaEnvelope className="text-blue-600" />
+          <a 
+            href={`mailto:${trainer.email}`} 
+            className="text-blue-600 hover:text-blue-800 transition duration-300"
+          >
+            {trainer.email}
+          </a>
+        </div>
       </div>
 
       <div className="mt-6 text-center">

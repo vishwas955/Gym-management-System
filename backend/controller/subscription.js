@@ -95,3 +95,19 @@ exports.getSubscription = async (req,res) => {
         });
     } 
 }
+
+
+exports.getSubscriptionById = async (req,res) => {
+    try {
+        const  id  = req.params.id;
+        const SubsPlans = await subscription_model.findById(id);
+        res.status(200).json(
+            SubsPlans
+        );
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({
+            error: 'Server Error!'
+        });
+    } 
+}

@@ -79,10 +79,11 @@ const MemberReport = () => {
         doc.setFontSize(16);
         doc.text("Member Report", 14, 16);
 
-        const tableColumn = ["ID", "Name", "Join Date", "Membership Status"];
+        const tableColumn = ["ID","Name","Email", "Join Date", "Membership Status"];
         const tableRows = filteredMembers.map(member => [
             member._id,
             `${member.first_name} ${member.last_name}`,
+            member.gym_member_id?.email || "N/A",
             new Date(member.createdAt).toLocaleDateString(),
             member.membershipStatus || "No Membership"
         ]);
@@ -107,6 +108,7 @@ const MemberReport = () => {
         const data = filteredMembers.map(member => ({
             ID: member._id,
             Name: `${member.first_name} ${member.last_name}`,
+            Email: member.gym_member_id?.email,
             JoinDate: new Date(member.createdAt).toLocaleDateString(),
             MembershipStatus: member.membershipStatus || "No Membership"
         }));
@@ -137,8 +139,8 @@ const MemberReport = () => {
                 <table className="w-full table-auto">
                     <thead className="bg-blue-900 text-white">
                         <tr>
-                            <th className="py-3 px-4">ID</th>
                             <th className="py-3 px-4">Name</th>
+                            <th className="py-3 px-4">Email</th>
                             <th className="py-3 px-4">Join Date</th>
                             <th className="py-3 px-4">Membership Status</th>
                         </tr>
@@ -149,8 +151,8 @@ const MemberReport = () => {
                         ) : filteredMembers.length > 0 ? (
                             filteredMembers.map(member => (
                                 <tr key={member._id} className="border-b">
-                                    <td className="py-3 px-4 text-center">{member._id}</td>
                                     <td className="py-3 px-4 text-center">{member.first_name} {member.last_name}</td>
+                                    <td className="py-3 px-4">{member.email}</td>
                                     <td className="py-3 px-4 text-center">{new Date(member.createdAt).toLocaleDateString()}</td>
                                     <td className="py-3 px-4 text-center">{member.membershipStatus || "No Membership"}</td>
                                 </tr>

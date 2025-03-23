@@ -451,16 +451,16 @@ exports.getAssignedTrainers = async (req, res) => {
 //View Assigned Trainer of a particular Member 
 exports.getAssignedUserTrainer = async (req, res) => {
     try {
-        const { memberId } = req.user._id;
+        const memberId = req.user._id;
         const membersWithTrainers = await User.findOne({ role: "Member", _id : memberId,trainer_id: { $ne: null } }) 
             .populate("trainer_id", "first_name last_name email expertise experience certifications") // Fetch trainer details (name, email)
             .select("first_name last_name email trainer_id"); // Select relevant fields
 
-        if (membersWithTrainers.length === 0) {
+        if (!membersWithTrainers) {
             return res.status(404).json({ error: "No Trainers Assigned",success : false });
         }
 
-        res.status(200).json(membersWithTrainers);
+        res.status(200).json({message : "The Trainer Info is fetched", membersWithTrainers, success: true});
     } catch (error) {
         console.log(error);
         return res.status(500).json({

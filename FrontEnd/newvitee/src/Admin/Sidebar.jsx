@@ -9,6 +9,7 @@ import {
   DocumentTextIcon,
   QuestionMarkCircleIcon,
   EnvelopeIcon,
+  DocumentChartBarIcon,
 } from "@heroicons/react/24/solid";
 
 const Sidebar = () => {
@@ -189,9 +190,20 @@ const Sidebar = () => {
             </Link>
           </li>
           <li>
-            <Link to= "/Reports">
-            Reports</Link>
-          </li>
+            <Link
+              to="/Reports" 
+              className={`block py-3 px-4 rounded-lg transition-colors ${
+                activeItem === "/Reports" 
+                  ? "bg-indigo_800 text-white" 
+                  : "hover:bg-indigo_800 text-white" 
+                } flex items-center`} 
+                onClick={() => handleItemClick("/Reports")}
+             >
+               {/* Use an appropriate icon for Reports */}
+               <DocumentChartBarIcon className="h-6 w-6 mr-2" /> 
+               Reports 
+             </Link> 
+           </li>
         </ul>
       </aside>
     </div>

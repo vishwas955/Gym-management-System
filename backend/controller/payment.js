@@ -3,13 +3,16 @@ const Payment = require("../model/payment_model");
 // Create a new payment record
 exports.createPayment = async (req, res) => {
     try {
-        const { transaction_id, gym_member_id, amount, method, status } = req.body;
-        if (!transaction_id || !gym_member_id || !amount || !method || !status) {
+        const { transaction_id, plan_id, amount, method, status } = req.body;
+        const gym_member_id = req.user._id;
+        console.log(`transaction_id:${transaction_id}, plan_id:${plan_id}, gym_member_id:${gym_member_id}, ${amount}, ${method}, ${status}`);
+        if (!transaction_id || !plan_id || !gym_member_id || !amount || !method || !status) {
             return res.status(400).json({ message: "All fields are required." });
         }
-
+ 
         const newPayment = new Payment({
             transaction_id,
+            plan_id,
             gym_member_id,
             amount,
             method,
@@ -17,7 +20,7 @@ exports.createPayment = async (req, res) => {
         });
 
         await newPayment.save();
-        res.status(201).json({ message: "Payment created successfully!", payment: newPayment });
+        res.status(201).json({ message: "Payment created successfully!", Transaction_Id: newPayment.transaction_id });
     } catch (error) {
         console.error("Error creating payment:", error);
         res.status(500).json({ message: "Internal Server Error" });

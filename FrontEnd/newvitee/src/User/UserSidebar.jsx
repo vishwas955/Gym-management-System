@@ -92,13 +92,13 @@ const UserSidebar = () => {
           </li>
           <li>
             <Link
-              to="/ManageSubscription"
+              to="/User/UserSubscritpion"
               className={`block py-3 px-4 rounded-lg transition-colors ${
-                activeItem === "/ManageSubscription"
+                activeItem === "/User/UserSubscritpion"
                   ? "bg-indigo-800 text-white"
                   : "hover:bg-indigo-800 text-white"
               } flex items-center`}
-              onClick={() => handleItemClick("/ManageSubscription")}
+              onClick={() => handleItemClick("/User/UserSubscritpion")}
             >
               <ClipboardIcon className="h-6 w-6 mr-2" />
               Gym Subscription
@@ -106,7 +106,7 @@ const UserSidebar = () => {
           </li>
           <li>
             <Link
-              to="/ManageMembership"
+              to="/User/UserMembership"
               className={`block py-3 px-4 rounded-lg transition-colors ${
                 activeItem === "/ManageMembership"
                   ? "bg-indigo-800 text-white"
@@ -148,13 +148,13 @@ const UserSidebar = () => {
           </li>
           <li>
             <Link
-              to="/Workoutplan"
+              to="/User/UserWorkoutPlan"
               className={`block py-3 px-4 rounded-lg transition-colors ${
-                activeItem === "/Workoutplan"
+                activeItem === "/User/UserWorkoutPlan"
                   ? "bg-indigo-800 text-white"
                   : "hover:bg-indigo-800 text-white"
               } flex items-center`}
-              onClick={() => handleItemClick("/Workoutplan")}
+              onClick={() => handleItemClick("/User/UserWorkoutPlan")}
             >
               <DocumentTextIcon className="h-6 w-6 mr-2" />
               Workout Plan

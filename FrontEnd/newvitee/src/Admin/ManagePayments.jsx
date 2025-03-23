@@ -1,44 +1,74 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import DatePicker from "react-datepicker"; // Import DatePicker
-import "react-datepicker/dist/react-datepicker.css"; // Import styles
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import { jsPDF } from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 
 const ManagePayments = () => {
     const [payments, setPayments] = useState([]);
+    const [filteredPayments, setFilteredPayments] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [perPage] = useState(5);
-    const [startDate, setStartDate] = useState(null); // Start date state
-    const [endDate, setEndDate] = useState(null);     // End date state
+    const [startDate, setStartDate] = useState(null);
+    const [endDate, setEndDate] = useState(null);
 
-    // Fetch payments from the backend with pagination and search
     useEffect(() => {
-        const fetchPayments = async () => {
-            try {
-                const response = await axios.get('http://localhost:4000/payment/get-payment', {
-                    params: {
-                        page,
-                        limit: perPage,
-                        search: searchQuery,
-                        startDate: startDate ? startDate.toISOString() : null,
-                        endDate: endDate ? endDate.toISOString() : null,
-                    },
-                    withCredentials: true // Allow cookies to be sent with the request
-                });
-                setPayments(response.data.payments);
-                setTotalPages(response.data.totalPages);
-            } catch (error) {
-                console.error("Error fetching payments:", error);
-            }
-        };
         fetchPayments();
-    }, [page, perPage, searchQuery, startDate, endDate]);
+    }, []);
 
-    // Handle Pagination
+    useEffect(() => {
+        filterPayments();
+    }, [searchQuery, startDate, endDate, payments]);
+
+    const fetchPayments = async () => {
+        try {
+            const response = await axios.get('http://localhost:4000/payment/get-payment', {
+                params: {
+                    page,
+                    limit: perPage,
+                    search: searchQuery,
+                    startDate: startDate ? startDate.toISOString() : null,
+                    endDate: endDate ? endDate.toISOString() : null,
+                },
+                withCredentials: true
+            });
+            setPayments(response.data.payments);
+            setFilteredPayments(response.data.payments);
+            setTotalPages(response.data.totalPages);
+        } catch (error) {
+            console.error("Error fetching payments:", error);
+        }
+    };
+
+    const filterPayments = () => {
+        let filtered = payments;
+
+        if (searchQuery) {
+            filtered = filtered.filter(payment =>
+                payment.method?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                payment.status?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                `${payment.gym_member_id?.first_name} ${payment.gym_member_id?.last_name}`?.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+        }
+
+        if (startDate && endDate) {
+            filtered = filtered.filter(payment => {
+                const paymentDate = new Date(payment.createdAt);
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                end.setHours(23, 59, 59, 999);
+                return paymentDate >= start && paymentDate <= end;
+            });
+        }
+
+        setFilteredPayments(filtered);
+        setPage(1); // Reset page number after filtering
+    };
+
     const handlePrevPage = () => {
         if (page > 1) setPage(page - 1);
     };
@@ -47,45 +77,44 @@ const ManagePayments = () => {
         if (page < totalPages) setPage(page + 1);
     };
 
-    // Calculate total revenue based on payments
     const calculateTotalRevenue = () => {
-        return payments.reduce((total, payment) => total + payment.amount, 0);
+        if (!filteredPayments) return 0;
+        return filteredPayments.reduce((total, payment) => total + payment.amount, 0).toFixed(2);
     };
 
-    // Generate PDF Report
     const generatePDFReport = () => {
+        if (!filteredPayments.length) {
+            alert("No payments available in the selected range!");
+            return;
+        }
+
         const doc = new jsPDF();
         doc.text("Payments Report", 10, 10);
 
-        // Add date range to the PDF
-        if (startDate && endDate) {
-            doc.text(`From: ${startDate.toLocaleDateString()} To: ${endDate.toLocaleDateString()}`, 10, 20);
-        }
-
-        const data = payments.map(payment => [
-            payment.transaction_id,
-            `${payment.gym_member_id?.first_name || ''} ${payment.gym_member_id?.last_name || ''}`,
-            payment.gym_member_id?.email,
-            `Rs.${payment.amount}`,
-            new Date(payment.createdAt).toLocaleDateString(),
-            payment.method,
-            payment.status,
+        const tableColumn = ['ID', 'User', 'Email', 'Amount', 'Date', 'Method', 'Status'];
+        const tableRows = filteredPayments.map(payment => [
+            `${payment.gym_member_id?.first_name || "N/A"} ${payment.gym_member_id?.last_name || "N/A"}`,
+            payment.gym_member_id?.email || "N/A",
+            `Rs.${payment.amount || "0"}`,
+            payment.createdAt ? new Date(payment.createdAt).toLocaleDateString() : "N/A",
+            payment.method || "N/A",
+            payment.status || "N/A",
         ]);
 
-        doc.autoTable({
-            head: [['ID', 'User', 'Email', 'Amount', 'Date', 'Method', 'Status']],
-            body: data,
+        autoTable(doc, {
+            head: [tableColumn],
+            body: tableRows,
+            startY: 20,
+            styles: { fontSize: 10, cellPadding: 3 },
+            columnStyles: { 0: { cellWidth: 22 }, 1: { cellWidth: 35 }, 2: { cellWidth: 40 }, 3: { cellWidth: 20 }, 4: { cellWidth: 25 } },
         });
 
         doc.text(`Total Revenue: Rs.${calculateTotalRevenue()}`, 10, doc.lastAutoTable.finalY + 10);
-
         doc.save("payments_report.pdf");
     };
 
-    // Generate Excel Report
     const generateExcelReport = () => {
-        const data = payments.map(payment => ({
-            ID: payment.transaction_id,
+        const data = filteredPayments.map(payment => ({
             User: `${payment.gym_member_id?.first_name || ''} ${payment.gym_member_id?.last_name || ''}`,
             Email: payment.gym_member_id?.email,
             Amount: `Rs.${payment.amount}`,
@@ -97,18 +126,13 @@ const ManagePayments = () => {
         const worksheet = XLSX.utils.json_to_sheet(data);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Payments");
-        
-        // Add total revenue at the end of the sheet
         XLSX.utils.sheet_add_aoa(worksheet, [[null, null, null, null, null, null, `Total Revenue: Rs.${calculateTotalRevenue()}`]], { origin: -1 });
-
         XLSX.writeFile(workbook, "payments_report.xlsx");
     };
 
     return (
         <div className="p-8 bg-gray-100 min-h-screen">
             <h1 className="text-3xl font-bold mb-6 text-gray-800">Manage Payments</h1>
-
-            {/* Date Range Picker */}
             <div className="mb-6">
                 <label className="block mb-2">Select Date Range:</label>
                 <div className="flex gap-4">
@@ -134,26 +158,20 @@ const ManagePayments = () => {
                 </div>
             </div>
 
-            {/* Search Bar */}
             <div className="mb-6">
                 <input
                     type="text"
                     className="border px-4 py-2 rounded w-full sm:w-1/2 mb-4"
                     placeholder="Search by payment method or status"
                     value={searchQuery}
-                    onChange={(e) => {
-                        setSearchQuery(e.target.value);
-                        setPage(1); // Reset to first page on search
-                    }}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                 />
             </div>
 
-            {/* Payment Table */}
             <div className="overflow-x-auto bg-white rounded-lg shadow-lg">
                 <table className="w-full table-auto">
                     <thead className="bg-blue-900 text-white">
                         <tr>
-                            <th className="py-3 px-4">ID</th>
                             <th className="py-3 px-4">User</th>
                             <th className="py-3 px-4">Email</th>
                             <th className="py-3 px-4">Amount</th>
@@ -163,9 +181,8 @@ const ManagePayments = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {payments.map((payment) => (
+                        {filteredPayments.map((payment) => (
                             <tr key={payment._id} className="border-b">
-                                <td className="py-3 px-4">{payment.transaction_id}</td>
                                 <td className="py-3 px-4">{payment.gym_member_id?.first_name} {payment.gym_member_id?.last_name}</td>
                                 <td className="py-3 px-4">{payment.gym_member_id?.email}</td>
                                 <td className="py-3 px-4">Rs.{payment.amount}</td>
@@ -178,7 +195,6 @@ const ManagePayments = () => {
                 </table>
             </div>
 
-            {/* Pagination Controls */}
             <div className="flex justify-between mt-6">
                 <button
                     onClick={handlePrevPage}
@@ -199,16 +215,14 @@ const ManagePayments = () => {
                 </button>
             </div>
 
-            {/* Report Generation Buttons */}
             <div className="mt-6 flex justify-end gap-4">
-                <button onClick={generatePDFReport} className="bg-red-500 text-white py-2 px-4 rounded">
+                <button onClick={generatePDFReport} className="bg-blue-500 text-white py-2 px-4 rounded">
                     Generate PDF Report
                 </button>
-                <button onClick={generateExcelReport} className="bg-green-500 text-white py-2 px-4 rounded">
+                <button onClick={generateExcelReport} className="bg-blue-500 text-white py-2 px-4 rounded">
                     Generate Excel Report
                 </button>
             </div>
-
         </div>
     );
 };

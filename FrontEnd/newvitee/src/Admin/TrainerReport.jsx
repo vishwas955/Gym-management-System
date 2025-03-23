@@ -142,7 +142,6 @@ const TrainerReport = () => {
                 <table className="w-full table-auto">
                     <thead className="bg-blue-900 text-white">
                         <tr>
-                            <th className="py-3 px-4">ID</th>
                             <th className="py-3 px-4">Name</th>
                             <th className="py-3 px-4">Email</th>
                             <th className="py-3 px-4">Date of Joining</th>
@@ -156,7 +155,6 @@ const TrainerReport = () => {
                         ) : filteredTrainers.length > 0 ? (
                             filteredTrainers.map((trainer) => (
                                 <tr key={trainer._id} className="border-b">
-                                    <td className="py-3 px-4 text-center">{trainer._id}</td>
                                     <td className="py-3 px-4 text-center">{trainer.first_name} {trainer.last_name}</td>
                                     <td className="py-3 px-4 text-center">{trainer.email}</td>
                                     <td className="py-3 px-4 text-center">

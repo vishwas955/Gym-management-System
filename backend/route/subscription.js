@@ -9,7 +9,7 @@ router.post('/add-subscription',auth.IsAdminAuth,Subscriptioncontroller.addsubsc
 router.put('/update-subscription/:id',auth.IsAdminAuth,Subscriptioncontroller.UpdateSubscription);
 router.delete('/delete-subscription/:id',auth.IsAdminAuth,Subscriptioncontroller.deleteSubscription);
 
-
+router.get('/get-subscription/:id',Subscriptioncontroller.getSubscriptionById);
 router.get('/get-subscription',Subscriptioncontroller.getSubscription);
 
 module.exports = router;
