@@ -15,6 +15,13 @@ exports.register = async (req,res) => {
     try{
         const {first_name,last_name,gender,role,email,password,phone_number,dob} = req.body;
         
+        // Check if password is provided
+        if (!password) {
+            return res.status(400).json({
+                error: "Password is required!"
+            });
+        }
+        
         //finding the ame email
         const isExistemail = await User.findOne({email});
 
@@ -31,7 +38,15 @@ exports.register = async (req,res) => {
             const newUser = new User({first_name,last_name,gender,role,email, password : hasedPassword ,phone_number,dob});
             await newUser.save();
            
-            res.status(201).json({ message:`${User.role} Registered Successfully`, success:"yes",data:newUser });
+            //Generate Cookie at the time of registration
+            const token = jwt.sign(
+                { User_id: newUser._id, email: newUser.email, role: newUser.role},
+                 process.env.JWT_SecretKey, // Use a secure secret key from your environment variables
+                 { expiresIn: '1h' } // Token expiration time
+             );
+            res.cookie("cookie_token",token,cookieOptions)
+
+            res.status(201).json({ message:`${User.role} Registered Successfully`, success: true, data:newUser, token });
         }
     }catch(err){
         console.error("Error during registration:", err);
@@ -65,7 +80,7 @@ exports.login = async (req,res) => {
             if (role===emailexists.role){
                 return res.status(200).json({ 
                     message: `${emailexists.role} Logged in Successfully!`, 
-                    success: "true", 
+                    success: true, 
                    token, // Include the token in the response
                     user: {
                         User_id: emailexists._id,
@@ -313,7 +328,7 @@ exports.UpdateUserProfile = async (req,res) => {
 exports.GetAllTrainer = async (req,res) => {
     try {   
         //Fetch Users whose role is Trainer 
-        const users = await User.find({role : 'Trainer'}, "first_name last_name email _id createdAt"); // Fetch only necessary fields
+        const users = await User.find({role : 'Trainer'}, "first_name last_name email _id createdAt phone_number expertise"); // Fetch only necessary fields
         res.json(users);
     } catch (error) {
         console.error("Error during resetPassword:", error);
@@ -354,7 +369,7 @@ exports.getTrainerProfile = async (req,res) => {
 exports.UpdateTrainerProfile = async (req,res) => {
     try {
         const { _id, role } = req.user;
-        const { height, weight, expertise, experience, certifications, first_name, last_name} = req.body;
+        const { height, weight, expertise, experience, certifications, first_name, last_name, dob} = req.body;
 
         //Verify the User is Trainer
         if(role !== "Trainer"){
@@ -377,10 +392,11 @@ exports.UpdateTrainerProfile = async (req,res) => {
         TrainerInfo.experience = experience;
         TrainerInfo.expertise = expertise;
         TrainerInfo.weight = weight;
+        TrainerInfo.dob = dob;
 
         await TrainerInfo.save();
 
-        res.status(200).json({message : "The Profile has been successfully Updated!", success : true });
+        res.status(200).json({message : `The Profile has been successfully Updated of the trainer ${first_name} ${last_name}!`, success : true });
 
     } catch (error) {
         console.error("Error during resetPassword:", error);

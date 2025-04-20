@@ -486,7 +486,7 @@ const ManageExerciseAndWorkoutPlan = () => {
                     >
                         <option value="">Select a User</option>
                         {users.map(user => (
-                            <option key={user._id} value={user._id}>{user.username}</option>
+                            <option key={user._id} value={user._id}>{user.first_name} {user.last_name}</option>
                         ))}
                     </select>
                 </div>

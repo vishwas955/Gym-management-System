@@ -1,24 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios'; // Import axios for making API requests
+import axios from 'axios';
 import { motion } from 'framer-motion';
 
 const UserSubscription = () => {
   const [plans, setPlans] = useState([]);
-  const [loading, setLoading] = useState(true); // State to handle loading
-  const [error, setError] = useState(null); // State to handle errors
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPlans = async () => {
       try {
-        // Fetch available plans from the backend API
         const response = await axios.get('http://localhost:4000/subscription/get-subscription', { withCredentials: true });
         setPlans(response.data);
       } catch (error) {
         setError(error.message);
       } finally {
-        setLoading(false); // Set loading to false after the request is completed
+        setLoading(false);
       }
     };
 
@@ -26,9 +25,16 @@ const UserSubscription = () => {
   }, []);
 
   const handleSelectPlan = (planId) => {
-    // Redirect to the payment page with the selected plan
     navigate(`/User/UserPayment/${planId}`);
   };
+
+  // Array of gradient colors for the cards
+  const cardGradients = [
+    'bg-gradient-to-br from-purple-400 via-violet-500 to-fuchsia-500',
+    'bg-gradient-to-br from-violet-400 via-purple-500 to-fuchsia-600',
+    'bg-gradient-to-br from-fuchsia-400 via-purple-500 to-violet-600',
+    'bg-gradient-to-br from-lavender-300 via-purple-400 to-violet-500'
+  ];
 
   return (
     <motion.div
@@ -47,44 +53,60 @@ const UserSubscription = () => {
         <p className="text-gray-500 text-lg text-center">No plans available.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-          {plans.map((plan) => {
-            let bgColor = 'bg-indigo-600'; // Default background color
-            if (plan.duration === 6) bgColor = 'bg-blue-600'; // Example for a specific duration
-            if (plan.duration === 12) bgColor = 'bg-green-600'; // Example for another duration
-
+          {plans.map((plan, index) => {
+            // Cycle through the gradient colors based on index
+            const gradientClass = cardGradients[index % cardGradients.length];
+            
             return (
               <motion.div
-                key={plan._id} // Use _id from MongoDB as key
-                className="rounded-lg shadow-md hover:shadow-xl transition duration-300 flex flex-col"
-                whileHover={{ scale: 1.05 }}
+                key={plan._id}
+                className="rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition duration-300 flex flex-col h-full"
+                whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.98 }}
               >
-                {/* Top Section */}
-                <div className={`p-6 ${bgColor} text-white rounded-t-lg`}>
-                  <h3 className="text-2xl font-bold text-center">{plan.name}</h3>
-                  <p className="text-center text-sm mt-2">Billed every {plan.duration} month(s)</p>
-                  <div className="flex justify-center items-center mt-4">
+                {/* Top Section with Gradient */}
+                <div className={`p-6 ${gradientClass} text-white`}>
+                  <div className="flex justify-between items-start">
+                    <h3 className="text-2xl font-bold">{plan.name}</h3>
+                    <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium">
+                      {plan.duration} {plan.duration === 1 ? 'Month' : 'Months'}
+                    </span>
+                  </div>
+                  <div className="mt-6 flex items-end">
                     <span className="text-4xl font-bold">Rs.{plan.price}</span>
-                    <span className="text-lg ml-1">/year</span>
+                    <span className="text-lg ml-1 mb-1">/year</span>
                   </div>
                 </div>
 
                 {/* Middle Section (Features) */}
-                <ul className="list-none p-6 flex-grow">
-                  {/* Displaying details of the plan */}
-                  <li className="text-lg text-gray-700 mb-2 flex items-center">
-                    <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    {plan.details || "No details available."}
-                  </li>
-                </ul>
+                <div className="p-6 flex-grow bg-white">
+                  <ul className="space-y-3">
+                    <li className="flex items-center">
+                      <svg className="w-5 h-5 text-purple-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                      </svg>
+                      <span className="text-gray-700">{plan.details || "Premium access"}</span>
+                    </li>
+                    <li className="flex items-center">
+                      <svg className="w-5 h-5 text-purple-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                      </svg>
+                      <span className="text-gray-700">All equipment included</span>
+                    </li>
+                    <li className="flex items-center">
+                      <svg className="w-5 h-5 text-purple-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                      </svg>
+                      <span className="text-gray-700">24/7 gym access</span>
+                    </li>
+                  </ul>
+                </div>
 
                 {/* Bottom Section (Button) */}
-                <div className="p-6">
+                <div className="p-6 bg-gray-50 border-t border-gray-200">
                   <button
-                    onClick={() => handleSelectPlan(plan._id)} // Pass the plan ID to the handler
-                    className="w-full px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-700 transition duration-300"
+                    onClick={() => handleSelectPlan(plan._id)}
+                    className={`w-full px-6 py-3 ${gradientClass} text-white rounded-lg hover:opacity-90 transition duration-300 shadow-md`}
                   >
                     Choose Plan
                   </button>

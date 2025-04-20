@@ -45,7 +45,7 @@ const UserMembership = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      <h2 className="text-4xl font-bold text-center text-gray-800 mb-8">Manage Your Membership</h2>
+      <h2 className="text-4xl font-bold text-center text-gray-800 mb-8">Membership</h2>
 
       {/* Current Plan Section */}
       <div className="bg-gray-100 p-5 rounded-lg shadow-md">

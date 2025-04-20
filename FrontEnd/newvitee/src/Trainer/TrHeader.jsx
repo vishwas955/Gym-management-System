@@ -47,12 +47,11 @@ const TrHeader = () => {
 
   return (
     <>
-      <header className="bg-indigo-900 text-white p-4 flex justify-between items-center shadow-lg sticky top-0 z-10">
-        <h1 className="text-2xl font-bold">Trainer Dashboard</h1>
-
+      <header className="bg-gradient-to-r from-purple-700 to-violet-500 text-white p-4 flex justify-between items-center shadow-lg sticky top-0 z-10">
+        <h1 className="text-2xl font-bold">Caliber Fitness</h1>
         <div className="relative">
           <button
-            className="dropdown-button bg-indigo-700 hover:bg-indigo-800 text-white rounded-full p-2"
+            className="dropdown-button bg-purple-600 hover:bg-purple-700 text-white rounded-full p-2"
             onClick={toggleDropdown}
           >
             <UserIcon className="h-6 w-6" />
@@ -61,17 +60,17 @@ const TrHeader = () => {
           <AnimatePresence>
             {isOpen && (
               <motion.ul
-                className="dropdown-menu absolute right-0 top-12 bg-indigo-700 text-white p-4 rounded-md shadow-md w-40"
+                className="dropdown-menu absolute right-0 top-12 bg-purple-600 text-white p-4 rounded-md shadow-md w-40"
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
               >
-                <li className="py-2 hover:bg-indigo-800 cursor-pointer">
+                <li className="py-2 px-2 hover:bg-purple-700 cursor-pointer rounded">
                   <Link to="/Trainer/Profile">Profile</Link>
                 </li>
-                <hr className="my-2 border-indigo-600" />
+                <hr className="my-2 border-purple-500" />
                 <li
-                  className="py-2 hover:bg-indigo-800 cursor-pointer"
+                  className="py-2 px-2 hover:bg-purple-700 cursor-pointer rounded"
                   onClick={handleLogout}
                 >
                   Logout
@@ -109,4 +108,4 @@ const TrHeader = () => {
   );
 };
 
-export default TrHeader;
+export default TrHeader;

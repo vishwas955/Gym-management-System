@@ -11,21 +11,23 @@ import {
   EnvelopeIcon,
 } from "@heroicons/react/24/solid";
 
-const UserSidebar = () => {
+const UserSidebar = ({ children }) => {
   const [isOpen, setIsOpen] = useState(true);
   const [activeItem, setActiveItem] = useState("/User/UserDashboard");
   
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
   };
+  
   const handleItemClick = (path) => {
     setActiveItem(path);
-  }
+  };
+
   return (
     <div className="flex">
       {/* Sidebar Toggle Buttons */}
       <button
-        className={`fixed top-4 left-4 z-10 bg-indigo-900 text-white p-2 rounded-lg hover:bg-indigo-800 transition-colors ${
+        className={`fixed top-4 left-4 z-50 bg-indigo-900 text-white p-2 rounded-lg hover:bg-indigo-800 transition-colors ${
           isOpen ? "hidden" : "block"
         }`}
         onClick={toggleSidebar}
@@ -47,7 +49,7 @@ const UserSidebar = () => {
       </button>
 
       <button
-        className={`fixed top-4 left-4 z-10 bg-indigo-900 text-white p-2 rounded-lg hover:bg-indigo-800 transition-colors ${
+        className={`fixed top-4 left-4 z-50 bg-indigo-900 text-white p-2 rounded-lg hover:bg-indigo-800 transition-colors ${
           isOpen ? "block" : "hidden"
         }`}
         onClick={toggleSidebar}
@@ -70,19 +72,20 @@ const UserSidebar = () => {
 
       {/* Sidebar */}
       <aside
-        className={`w-64 bg-indigo-900 text-white p-6 shadow-2xl transition-width duration-500 ${
-          isOpen ? "block" : "hidden"
+        className={`fixed top-0 left-0 h-screen w-64 bg-gradient-to-b from-purple-700 to-violet-900 text-white p-6 shadow-2xl transition-all duration-500 overflow-y-auto ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
+        style={{ zIndex: 40 }}
       >
-        <h2 className="text-3xl font-extrabold mt-8 mb-10">Hello Gym Member</h2>
+        <h2 className="text-3xl font-extrabold mt-8 mb-10"></h2>
         <ul className="space-y-6">
           <li>
             <Link
               to="/User/UserDashboard"
               className={`block py-3 px-4 rounded-lg transition-colors ${
                 activeItem === "/User/UserDashboard"
-                  ? "bg-indigo-800 text-white"
-                  : "hover:bg-indigo-800 text-white"
+                  ? "bg-violet-600/70 text-white"
+                  : "hover:bg-violet-600/50 text-white"
               } flex items-center`}
               onClick={() => handleItemClick("/User/UserDashboard")}
             >
@@ -95,8 +98,8 @@ const UserSidebar = () => {
               to="/User/UserSubscritpion"
               className={`block py-3 px-4 rounded-lg transition-colors ${
                 activeItem === "/User/UserSubscritpion"
-                  ? "bg-indigo-800 text-white"
-                  : "hover:bg-indigo-800 text-white"
+                  ? "bg-violet-600/70 text-white"
+                  : "hover:bg-violet-600/50 text-white"
               } flex items-center`}
               onClick={() => handleItemClick("/User/UserSubscritpion")}
             >
@@ -109,13 +112,13 @@ const UserSidebar = () => {
               to="/User/UserMembership"
               className={`block py-3 px-4 rounded-lg transition-colors ${
                 activeItem === "/ManageMembership"
-                  ? "bg-indigo-800 text-white"
-                  : "hover:bg-indigo-800 text-white"
+                  ? "bg-violet-600/70 text-white"
+                  : "hover:bg-violet-600/50 text-white"
               } flex items-center`}
               onClick={() => handleItemClick("/ManageMembership")}
             >
               <UsersIcon className="h-6 w-6 mr-2" />
-            Membership
+              Membership
             </Link>
           </li>
           <li>
@@ -123,8 +126,8 @@ const UserSidebar = () => {
               to="/User/UserPaymentHistory"
               className={`block py-3 px-4 rounded-lg transition-colors ${
                 activeItem === "/Payment"
-                  ? "bg-indigo-800 text-white"
-                  : "hover:bg-indigo-800 text-white"
+                  ? "bg-violet-600/70 text-white"
+                  : "hover:bg-violet-600/50 text-white"
               } flex items-center`}
               onClick={() => handleItemClick("/Payment")}
             >
@@ -137,8 +140,8 @@ const UserSidebar = () => {
               to="/User/AssignedTrainer"
               className={`block py-3 px-4 rounded-lg transition-colors ${
                 activeItem === "/AssignTrainer"
-                  ? "bg-indigo-800 text-white"
-                  : "hover:bg-indigo-800 text-white"
+                  ? "bg-violet-600/70 text-white"
+                  : "hover:bg-violet-600/50 text-white"
               } flex items-center`}
               onClick={() => handleItemClick("/AssignTrainer")}
             >
@@ -151,8 +154,8 @@ const UserSidebar = () => {
               to="/User/UserWorkoutPlan"
               className={`block py-3 px-4 rounded-lg transition-colors ${
                 activeItem === "/User/UserWorkoutPlan"
-                  ? "bg-indigo-800 text-white"
-                  : "hover:bg-indigo-800 text-white"
+                  ? "bg-violet-600/70 text-white"
+                  : "hover:bg-violet-600/50 text-white"
               } flex items-center`}
               onClick={() => handleItemClick("/User/UserWorkoutPlan")}
             >
@@ -165,8 +168,8 @@ const UserSidebar = () => {
               to="/User/UserFAQ"
               className={`block py-3 px-4 rounded-lg transition-colors ${
                 activeItem === "/User/UserFAQ"
-                  ? "bg-indigo-800 text-white"
-                  : "hover:bg-indigo-800 text-white"
+                  ? "bg-violet-600/70 text-white"
+                  : "hover:bg-violet-600/50 text-white"
               } flex items-center`}
               onClick={() => handleItemClick("/User/UserFAQ")}
             >
@@ -179,8 +182,8 @@ const UserSidebar = () => {
               to="/User/UserFeedback"
               className={`block py-3 px-4 rounded-lg transition-colors ${
                 activeItem === "/Feedback"
-                  ? "bg-indigo-800 text-white"
-                  : "hover:bg-indigo-800 text-white"
+                  ? "bg-violet-600/70 text-white"
+                  : "hover:bg-violet-600/50 text-white"
               } flex items-center`}
               onClick={() => handleItemClick("/Feedback")}
             >
@@ -190,7 +193,16 @@ const UserSidebar = () => {
           </li>
         </ul>
       </aside>
-    </div>
+
+      {/* Main Content Area */}
+      <main 
+        className={`flex-1 transition-all duration-500 ${
+          isOpen ? "ml-64" : "ml-0"
+        }`}
+      >
+        {children}
+      </main>
+    </div>  
   );
 };
 

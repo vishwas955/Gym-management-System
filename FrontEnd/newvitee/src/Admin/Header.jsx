@@ -48,21 +48,21 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-indigo-900 text-white p-4 flex justify-between items-center shadow-lg">
+    <header className="bg-gradient-to-r from-purple-700 to-violet-500 text-white p-4 flex justify-between items-center shadow-lg">
       <div className="flex items-center pl-12">
         <h1 className="text-2xl font-bold">Caliber Fitness</h1>
       </div>
       <div className="relative">
         <button
-          className="dropdown-button bg-indigo-700 hover:bg-indigo-800 text-white rounded-full p-2"
+          className="dropdown-button bg-purple-600 hover:bg-purple-700 text-white rounded-full p-2"
           onClick={toggleDropdown}
         >
           <UserIcon className="h-6 w-6" />
         </button>
         {isOpen && (
-          <ul className="dropdown-menu absolute right-0 top-12 bg-indigo-700 text-white p-4 rounded-md shadow-md">
+          <ul className="dropdown-menu absolute right-0 top-12 bg-purple-600 text-white p-4 rounded-md shadow-md">
             <li
-              className="py-2 hover:bg-indigo-800 cursor-pointer"
+              className="py-2 px-4 hover:bg-purple-700 cursor-pointer rounded"
               onClick={handleLogout}
             >
               Logout

@@ -20,7 +20,8 @@ exports.createPayment = async (req, res) => {
         });
 
         await newPayment.save();
-        res.status(201).json({ message: "Payment created successfully!", Transaction_Id: newPayment.transaction_id });
+        res.status(201).json({ message: "Payment created successfully!", Transaction_Id: newPayment.transaction_id, success : true });
+    
     } catch (error) {
         console.error("Error creating payment:", error);
         res.status(500).json({ message: "Internal Server Error" });

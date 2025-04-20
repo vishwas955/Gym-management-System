@@ -41,6 +41,8 @@ import MembershipReport from "./Admin/MembershipReport.jsx";
 import ManagePayments from "./Admin/ManagePayments.jsx";
 import TrainerReport from "./Admin/TrainerReport.jsx";
 import MemberReport from "./Admin/MemberReport.jsx";
+import Subscription from "./assets/Subscription.jsx";
+import Fpayment from "./assets/MakePayment.jsx";
 
 
 
@@ -68,20 +70,32 @@ const App = () => {
     fetchUser();
   }, [location.pathname]);
 
+  const hideSidebarAndHeader = ["/Subscription", "/Payment/:planId"].includes(location.pathname);
+
   return (
     <div className="flex min-h-screen">
-      {role === 'Admin' && <Sidebar />}
-      {role === 'Trainer' && <TrSidebar />}
-      {role === 'Member' && <UserSidebar />}
-
+      {/* Hide Sidebar and Header on Subscription and Payment Page */}
+      {!hideSidebarAndHeader && (
+        <>
+          {role === "Admin" && <Sidebar />}
+          {role === "Trainer" && <TrSidebar />}
+          {role === "Member" && <UserSidebar />}
+        </>
+      )}
+  
       <div className="flex-1">
-        {role === 'Admin' && <Header />}
-        {role === 'Trainer' && <TrHeader />}
-        {role === 'Member' && <UserHeader />}
-
+        {/* Header */}
+        {!hideSidebarAndHeader && (
+          <>
+            {role === "Admin" && <Header />}
+            {role === "Trainer" && <TrHeader />}
+            {role === "Member" && <UserHeader />}
+          </>
+        )}
+  
         <main className="p-6 bg-gray-100">
           {!role && !loading && <Navbar />}
-
+  
           {loading ? (
             <div className="flex items-center justify-center h-screen">
               <p className="text-lg font-semibold">Loading...</p>
@@ -94,8 +108,10 @@ const App = () => {
               <Route path="/login" element={<Login setUserType={setUserType} />} />
               <Route path="/ForgotPassword" element={<ForgotPassword />} />
               <Route path="/resetpassword" element={<ResetPassword />} />
+              <Route path="/Subscription" element={<Subscription />} />
+              <Route path="/Payment/:planId" element={<Fpayment />} />
               <Route path="/" element={<Home />} />
-
+  
               {/* Protected Routes */}
               {role === "Admin" ? (
                 <>
@@ -112,11 +128,11 @@ const App = () => {
                   <Route path="/MembershipReport" element={<MembershipReport />} />
                   <Route path="/ManagePayments" element={<ManagePayments />} />
                   <Route path="/TrainerReport" element={<TrainerReport />} />
-                  <Route path="/MemberReport" element={<MemberReport />} />
+                  <Route path="/MemberReport" element={<MemberReport />} />
                 </>
               ) : role === "Trainer" ? (
                 <>
-                  <Route path="/Trainer/TrainerDashboard" element={<TrainerDashboard />} /> 
+                  <Route path="/Trainer/TrainerDashboard" element={<TrainerDashboard />} />
                   <Route path="/Trainer/Feedback" element={<TrFeedback />} />
                   <Route path="/Trainer/Profile" element={<TrProfile />} />
                   <Route path="/Trainer/TrWkPlan" element={<AssignWorkoutPlan />} />

@@ -12,6 +12,7 @@ const UserPayment = () => {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
+  // Fetch plan details
   useEffect(() => {
     const fetchPlanDetails = async () => {
       try {
@@ -29,6 +30,7 @@ const UserPayment = () => {
     fetchPlanDetails();
   }, [planId]);
 
+  // Validate form inputs
   const validateForm = () => {
     const newErrors = {};
     if (!cardNumber.match(/^\d{16}$/)) {
@@ -52,6 +54,7 @@ const UserPayment = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Handle payment submission
   const handlePayment = async (event) => {
     event.preventDefault();
     if (!validateForm()) {
@@ -61,21 +64,37 @@ const UserPayment = () => {
 
     try {
       setIsLoading(true);
-      const response = await axios.post(
+      
+      // Step 1: Make Payment Request
+      const paymentResponse = await axios.post(
         'http://localhost:4000/payment/add-payment',
         {
           transaction_id: `TXN-${Date.now()}`,
           plan_id: selectedPlan._id,
           amount: selectedPlan.price,
-          method: 'Credit Card',
-          status: 'Pending'
+           method: "Card",  // Added method
+          status: "Completed"
         },
-        { withCredentials: true } // Cookies will be sent automatically
+        { withCredentials: true }
       );
 
-      if (response.data.success) {
-        alert(`Payment for ${selectedPlan.name} completed successfully!`);
-        navigate('/User/UserPaymentHistory');
+      if (paymentResponse.data.success) {
+        // Step 2: Update Membership After Payment
+        const startDate = new Date().toISOString(); // Get current date in ISO format
+
+        await axios.put(
+          'http://localhost:4000/membership/update-user-membership',
+          { subscriptionId: selectedPlan._id, startDate },  // Sending plan ID & start date
+          { withCredentials: true }
+        );
+
+        alert(`Payment for ${selectedPlan.name} completed successfully! Your membership has been updated.`);
+
+        await axios.post("http://localhost:4000/auth/User/logout", {}, {
+          withCredentials: true,
+        });
+        
+        navigate('/login'); // Redirect to dashboard or membership page
       }
     } catch (error) {
       console.error('Payment error:', error);
@@ -131,11 +150,11 @@ const UserPayment = () => {
               {errors.expiryDate && <p className="text-red-500 text-sm">{errors.expiryDate}</p>}
             </div>
 
-            {/* CVV Field with masked input */}
+            {/* CVV Field */}
             <div>
               <label className="block text-gray-700 font-medium">CVV</label>
               <input
-                type="password" // Changed from text to password
+                type="password"
                 placeholder="123"
                 value={cvv}
                 onChange={(e) => setCvv(e.target.value.replace(/\D/g, ''))} // Only allow numbers

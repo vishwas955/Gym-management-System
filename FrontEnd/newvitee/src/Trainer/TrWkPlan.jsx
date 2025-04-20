@@ -16,7 +16,7 @@ const AssignWorkoutPlan = () => {
 
     const fetchMembers = async () => {
         try {
-            const response = await axios.get('http://localhost:4000/auth/User/get-users', { withCredentials: true });
+            const response = await axios.get('http://localhost:4000/auth/User/get-users',  { withCredentials: true });
             setMembers(response.data);
         } catch (error) {
             setMessage({ text: 'Error fetching members.', type: 'error' });

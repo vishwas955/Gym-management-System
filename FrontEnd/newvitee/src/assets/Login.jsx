@@ -59,7 +59,7 @@ function Login({setUserType}) {
         setUserType(userRole);
 
          // Redirect based on user type
-         if (userRole === "Admin") navigate("/Admin/AdminDashboard");
+         if (userRole === "Admin") navigate("/AdminDashboard");
          else if (userRole === "Trainer") navigate("/Trainer/TrainerDashboard");
          else navigate("/User/UserDashboard");
       }

@@ -8,5 +8,5 @@ router.put('/update-membership/:id',auth.IsAdminAuth,Membershipcontroller.update
 router.delete('/delete-membership/:id',auth.IsAdminAuth,Membershipcontroller.disableMembership);
 router.get('/get-membership',auth.IsAdminAuth,Membershipcontroller.getMembership);
 router.get('/get-user-membership',auth.auth,Membershipcontroller.getUserMembership);
-
+router.put('/update-user-membership',auth.auth,Membershipcontroller.updateUserMembership); 
 module.exports = router;

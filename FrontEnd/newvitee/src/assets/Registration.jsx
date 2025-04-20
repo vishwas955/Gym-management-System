@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 function Registration() {
   const [formMessages, setFormMessages] = useState([]);
   const [successMessage, setSuccessMessage] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -89,11 +90,22 @@ function Registration() {
         dob,
         gender,
         role,
+      }, {
+        withCredentials: true
       });
 
       if (response.data) {
         setSuccessMessage(`Registration successful as ${role}!`);
         setFormMessages([]);
+        if (role === "Member"){
+          setTimeout(() => {
+            navigate("/Subscription");
+          }, 1000); 
+        }else{
+          setTimeout(() => {
+            navigate("/login");
+          }, 1000); 
+        }
         form.reset(); // Reset form fields
       }
     } catch (error) {
@@ -128,7 +140,7 @@ function Registration() {
           {/* Optional Logo (Replace with your actual logo) */}
           <div className="absolute top-4 right-4">
           <img
-          src="/Caliber_Logo.png" // Path to your logo image in the public folder
+          src="/images/Caliber_Logo.jpg" // Path to your logo image in the public folder
           alt="Logo"
           className="h-10 w-10" // Adjust size as needed
         />
@@ -288,7 +300,7 @@ function Registration() {
                 User Type
               </label>
               <div className="mt-2 flex space-x-6">
-                <div className="flex items-center">
+                {/* <div className="flex items-center">
                   <input
                     type="radio"
                     id="admin"
@@ -300,7 +312,7 @@ function Registration() {
                   <label htmlFor="admin" className="ml-2 block text-sm text-gray-800">
                     Admin
                   </label>
-                </div>
+                </div> */}
                 <div className="flex items-center">
                   <input
                     type="radio"

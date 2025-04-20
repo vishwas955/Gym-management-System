@@ -110,6 +110,7 @@ function Home() {
           <h3 className="text-3xl font-semibold text-yellow-400">New to gyming?</h3>
           <p className="text-lg text-gray-300">We got you covered with our Fitness plans</p>
           <p className="text-gray-400"></p>
+          <Link to="/Registration">
           <motion.button
             className="bg-yellow-500 text-black font-bold py-3 px-6 rounded-md hover:bg-yellow-600 transition-colors duration-300"
             whileHover={{ scale: 1.05 }}
@@ -117,12 +118,13 @@ function Home() {
           >
             START NOW!
           </motion.button>
+          </Link>
         </motion.div>
         <motion.div className="space-y-4" variants={itemVariants}>
           <h3 className="text-3xl font-semibold text-yellow-400">Working hours</h3>
           <div className="text-gray-300">
-            <p>Sunday<br />7:00 AM - 01:00 PM</p>
-            <p>Monday - Saturday<br />7:00 AM - 10:00 PM</p>
+            <p>Sunday<br />7:00 AM - 7:00 PM</p>
+            <p>Monday - Saturday<br />5:00 AM - 8:00 PM</p>
           </div>
         </motion.div>
       </motion.div>
@@ -164,60 +166,71 @@ function Home() {
       </motion.section>
 
       {/* Membership Plans Section */}
-      <motion.section
-        id="plans"
-        className="px-8 py-16 bg-black"
-        variants={sectionVariants}
-        initial="hidden"
-        animate={plansInView ? "visible" : "hidden"}
-        ref={plansRef}
+   {/* Membership Plans Section */}
+<motion.section
+  id="plans"
+  className="px-8 py-16 bg-black"
+  variants={sectionVariants}
+  initial="hidden"
+  animate={plansInView ? "visible" : "hidden"}
+  ref={plansRef}
+>
+  <h2 className="text-3xl md:text-4xl font-bold text-center text-yellow-400 mb-10">
+    Membership Plans
+  </h2>
+  
+  <div className="flex flex-wrap justify-center gap-6">
+    {[
+      {
+        title: "Standard Plan",
+        features: ["Access to gym facilities", "Personalized workout plan"],
+        price: "Rs. 12,000/year",
+      },
+      {
+        title: "Premium Plan",
+        features: [
+          "Access to gym facilities",
+          "Personalized workout plan",
+          "1-on-1 coaching sessions",
+        ],
+        price: "Rs. 18,000/year",
+      },
+      // {
+      //   title: "VIP Plan",
+      //   features: [
+      //     "Access to gym facilities in PRIVATE workspace",
+      //     "Personalized workout plan",
+      //     "1-on-1 coaching sessions with assigned trainers",
+      //   ],
+      //   price: "Rs. 24,000/year",
+      // },
+    ].map((plan, index) => (
+      <motion.div
+        key={index}
+        className="w-full md:w-1/3 p-8 bg-gray-300 shadow-lg rounded-xl text-center transform hover:scale-105 hover:shadow-2xl transition-transform duration-300"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        variants={itemVariants}
       >
-        <h2 className="text-3xl md:text-4xl font-bold text-center text-yellow-400 mb-10">Membership Plans</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          {[
-            {
-              title: "Basic Plan",
-              features: ["Access to gym facilities"],
-              price: "Rs. 1500/month",
-            },
-            {
-              title: "Standard Plan",
-              features: ["Access to gym facilities", "Personalized workout plan"],
-              price: "Rs. 1700/month",
-            },
-            {
-              title: "Premium Plan",
-              features: [
-                "Access to gym facilities",
-                "Personalized workout plan",
-                "1-on-1 coaching sessions",
-              ],
-              price: "Rs. 2000/month",
-            },
-          ].map((plan, index) => (
-            <motion.div
-              key={index}
-              className="p-8 bg-gray-300 shadow-lg rounded-xl text-center transform hover:scale-105 hover:shadow-2xl transition-transform duration-300"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              variants={itemVariants}
-            >
-              <h3 className="text-xl font-bold text-black mb-4">{plan.title}</h3>
-              <ul className="text-black space-y-2 mb-6">
-                {plan.features.map((feature, i) => (
-                  <li key={i} className="flex items-center gap-2">
-                    <span className="text-yellow-400 font-semibold">✓</span> {feature}
-                  </li>
-                ))}
-              </ul>
-              <p className="text-xl font-bold text-black mb-4">{plan.price}</p>
-              <Link to="/Registration">
-                <button className="px-6 py-2 bg-yellow-400 text-black font-semibold rounded-lg hover:bg-yellow-500 transition-all duration-300">Join Now</button>
-              </Link>
-            </motion.div>
+        <h3 className="text-xl font-bold text-black mb-4">{plan.title}</h3>
+        <ul className="text-black space-y-2 mb-6">
+          {plan.features.map((feature, i) => (
+            <li key={i} className="flex items-center gap-2">
+              <span className="text-yellow-400 font-semibold">✓</span> {feature}
+            </li>
           ))}
-        </div>
-      </motion.section>
+        </ul>
+        <p className="text-xl font-bold text-black mb-4">{plan.price}</p>
+        <Link to="/Registration">
+          <button className="px-6 py-2 bg-yellow-400 text-black font-semibold rounded-lg hover:bg-yellow-500 transition-all duration-300">
+            Join Now
+          </button>
+        </Link>
+      </motion.div>
+    ))}
+  </div>
+</motion.section>
+
 
       {/* Footer */}
       <footer className="text-center bg-black text-white py-6">

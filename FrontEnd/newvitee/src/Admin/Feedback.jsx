@@ -19,7 +19,7 @@ const Feedback = () => {
       const response = await axios.get(`${BASE_API_URL}/get-feedback`,
         {withCredentials : true }
       );
-      setFeedbacks(response.data);
+      setFeedbacks(response.data.feedbacks);
     } catch (error) {
       console.error("Error fetching feedbacks:", error);
     }
@@ -98,7 +98,7 @@ const Feedback = () => {
                     setFeedbackToDelete(feedback);
                   }}
                 >
-                  Delete
+                  Disable
                 </button>
               </td>
             </motion.tr>

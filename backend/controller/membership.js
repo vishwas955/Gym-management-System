@@ -49,13 +49,13 @@ exports.newMembership = async (req,res) => {
 }
 
 
-//Upadte the Membership of the gym members
+//Upadte the Membership of the gym members through Admin
 exports.updateMembership = async (req, res) => {
     try{
        await expiredMemberships.updateExpiredMemberships();
        const gymMemberId = req.params.id ;
        const { subscriptionId, startDate} = req.body;
-       const membership = await membership_model.findOne({gymMemberId}).populate('gymMemberId','first_name last_name');
+       const membership = await User_model.findOne({gymMemberId});
        if (!membership){
         return res.status(404).json({
             error : 'Gym Member not found', success : false
@@ -72,6 +72,7 @@ exports.updateMembership = async (req, res) => {
        const start = new Date(startDate);
        start.setMonth(start.getMonth() + durationInMonths); // Add months to start date
         const endDate = start;
+       membership.gymMemberId = gymMemberId;
        membership.subscriptionId = subscriptionId;
        membership.startDate = startDate;
        membership.endDate = endDate;
@@ -91,6 +92,65 @@ exports.updateMembership = async (req, res) => {
         });
     }
 }
+
+
+//Upadte membership from the User Account
+exports.updateUserMembership = async (req, res) => {
+    try{
+       await expiredMemberships.updateExpiredMemberships();
+       const gymMemberId = req.user._id ;
+       const { subscriptionId, startDate} = req.body;
+       const membership = await User_model.findById(gymMemberId);
+       if (!membership){
+        return res.status(404).json({
+            error : 'Gym Member not found', success : false
+        })
+       }
+
+       const subscription = await subscription_model.findById(subscriptionId);
+       if (!subscription) {
+            return res.status(404).json({ error: "Subscription plan not found!" });
+        }
+        
+        const Usersubscription = await membership_model.findOne({gymMemberId});
+
+        if ( !Usersubscription ){
+            const durationInMonths = subscription.duration; // Extract the duration
+
+            const start = new Date(startDate);
+            start.setMonth(start.getMonth() + durationInMonths); // Add months to start date
+
+            const endDate = start;
+            const newMembership = new membership_model({gymMemberId, subscriptionId, startDate, endDate, status: 'Active'});
+            await newMembership.save();
+        }else{
+            const durationInMonths = subscription.duration; // Extract the duration
+
+            const start = new Date(startDate);
+            start.setMonth(start.getMonth() + durationInMonths); // Add months to start date
+             const endDate = start;
+             membership.gymMemberId = gymMemberId;
+            membership.subscriptionId = subscriptionId;
+            membership.startDate = startDate;
+            membership.endDate = endDate;
+            membership.status = 'Active';
+     
+            await membership.save();   
+        }
+
+       res.status(200).json({
+        message : `The Membership is successfully updated`,
+        success : true
+       });
+
+    }catch(error){
+        console.log(error);
+        return res.status(500).json({
+            error: 'Internal Server Error!', success : false
+        });
+    }
+}
+
 
 
 //  Delete\Disable the Membership of the Gym MemberShip 
