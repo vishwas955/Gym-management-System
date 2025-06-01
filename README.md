@@ -10,8 +10,7 @@
 ### For Gym Members 🏋️
 - 📄 **Personal Dashboard** – Access membership details and payment history.
 - 🔄 **Membership Management** – Upgrade, renew, or cancel plans easily.
-- 🏆 **Progress Tracking** – Monitor workouts, routines, and personal achievements.
-- 📊 **Reports & Insights** – View fitness stats over time.
+- 🏆 **Workout Plans** – Monitor workouts and routines.
 - 🗓️ **Calendar-based Report Filtering** – Analyze activity on daily/weekly/monthly basis.
 
 ### For Gym Admins 🏢
@@ -21,12 +20,12 @@
 - 📊 **Automated Report Generation** – Weekly, Monthly, and Annual reports with **CSV/PDF** export support.
 - 💬 **Chatbot Integration** – Answers queries from a backend knowledge base.
 - 📝 **Manage Subscription Plans** – Create, update, or disable plans.
-- 💬 **Feedback Moderation** – View and disable inappropriate content.
+- 💬 **Feedback Moderation** – View feedbacks and disable inappropriate feedbacks.
 - 🏋️‍♀️ **Workout Plan Management** – Add general workout templates for members.
 
 ### For Trainers 🏋️‍♂️
 - 📋 **Trainer Dashboard** – View assigned members and plan their routines.
-- 🏋️‍♂️ **Workout Plan Management** – Create personalized fitness routines.
+- 🏋️‍♂️ **Workout Plan Management** – Assign workout plans to the members.
 - 📈 **Track Member Progress** – Help members improve by tracking and reviewing their progress.
 
 ## 🛠️ Tech Stack
@@ -34,35 +33,17 @@
 - **Backend**: Node.js, Express.js 🚀
 - **Database**: MongoDB 🍃
 - **Authentication**: JWT + HTTP-only Cookies 🔐
-- **File Upload**: Multer & Cloudinary ☁️
-
-## 📌 Future Enhancements
-- 📅 **Class & Training Session Scheduling**
-- 🔗 **Payment Gateway Integration** (e.g., Razorpay/Stripe)
-- 📲 **Mobile Application**
-- 📈 **Advanced Analytics**
-- 🎤 **Voice-Based Chatbot**
-- 🗓️ **Attendance Tracking for Gym Members**
-- 🥗 **Nutritionist Integration**
-- 🛍️ **Product Recommendation Engine**
-- 🎯 **Fitness Challenges & Rewards**
-- 📩 **Automated Notifications & Reminders**
 
 ## 🧪 Environment Setup
 
 Create a `.env` file in the backend root with the following variables:
 
 ```env
-PORT=8000
+PORT=4000
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret
 
-# Cloudinary Config
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
-
-# Email (Optional for notifications)
+# Email
 EMAIL_SERVICE=your_email_service
 EMAIL_USER=your_email@example.com
 EMAIL_PASS=your_email_password
@@ -92,11 +73,6 @@ npm run dev
 ## 💡 Contributing
 
 Love fitness and code? Fork the repo, suggest features, or raise issues to make Caliber Fitness even better. Contributions are always welcome! 💥
-
-## 📞 Contact
-
-- 📧 Email: your-email@example.com
-- 🐙 GitHub: [your-github](https://github.com/your-username)
 
 ---
 
